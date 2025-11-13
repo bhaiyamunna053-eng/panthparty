@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PANTHPARTY - Watch YouTube Together</title>
+    <title>𝐏𝐀𝐍𝐓𝐇 𝐏𝐀𝐑𝐓𝐘 ➤ 𝑊𝑎𝑡𝑐ℎ 𝑌𝑜𝑢𝑇𝑢𝑏𝑒 𝑇𝑜𝑔𝑒𝑡ℎ𝑒𝑟 </title>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
         * {
@@ -918,20 +918,20 @@
         <div class="header">
             <div class="logo">
                 <div class="logo-icon">▶</div>
-                <span>PANTHPARTY</span>
+                <span>𝐏𝐀𝐍𝐓𝐇 𝐏𝐀𝐑𝐓𝐘</span>
             </div>
         </div>
 
         <!-- Join Section -->
         <div class="join-section" id="joinSection">
-            <h2>Join or Create a Party Room</h2>
-            <p>Watch YouTube videos together with friends in real-time</p>
+            <h2>𝐉𝐨𝐢𝐧 𝐨𝐫 𝐂𝐫𝐞𝐚𝐭𝐞 𝐚 𝐏𝐚𝐫𝐭𝐲 𝐑𝐨𝐨𝐦</h2>
+            <p> 𝑊𝑎𝑡𝑐ℎ 𝑌𝑜𝑢𝑇𝑢𝑏𝑒 𝑣𝑖𝑑𝑒𝑜𝑠 𝑡𝑜𝑔𝑒𝑡ℎ𝑒𝑟 𝑤𝑖𝑡ℎ 𝑓𝑟𝑖𝑒𝑛𝑑𝑠 𝑖𝑛 𝑟𝑒𝑎𝑙-𝑡𝑖𝑚𝑒 </p>
             <div class="input-group">
                 <input type="text" id="nicknameInput" placeholder="Enter your nickname" maxlength="20" />
                 <input type="text" id="roomInput" placeholder="Enter Room ID (e.g., movie-night-2024)" />
                 <button class="btn-primary" onclick="joinRoom()">Join Party</button>
             </div>
-            <p class="helper-text">💡 Share the same Room ID with friends to watch together</p>
+            <p class="helper-text"> ☕︎ 𝘚𝘩𝘢𝘳𝘦 𝘵𝘩𝘦 𝘴𝘢𝘮𝘦 𝘙𝘰𝘰𝘮 𝘐𝘋 𝘸𝘪𝘵𝘩 𝘧𝘳𝘪𝘦𝘯𝘥𝘴 𝘵𝘰 𝘸𝘢𝘵𝘤𝘩 𝘵𝘰𝘨𝘦𝘵𝘩𝘦𝘳 </p>
         </div>
 
         <!-- App Section -->
@@ -947,12 +947,12 @@
                         </h3>
                         <div class="user-count">
                             <span class="status-dot"></span>
-                            <span id="userCount">1</span> watching
+                            <span id="userCount">1</span> 𝒘𝒂𝒕𝒄𝒉𝒊𝒏𝒈
                         </div>
                     </div>
                     <div class="room-actions">
                         <button class="btn-settings" id="settingsBtn" onclick="openSettings()" style="display:none;">⚙️</button>
-                        <button class="btn-leave" onclick="leaveRoom()">Leave Room</button>
+                        <button class="btn-leave" onclick="leaveRoom()">𝑳𝒆𝒂𝒗𝒆 𝑹𝒐𝒐𝒎</button>
                     </div>
                 </div>
 
@@ -962,7 +962,7 @@
                 </div>
 
                 <div class="video-info">
-                    <h1 class="video-title" id="videoTitle">Loading video...</h1>
+                    <h1 class="video-title" id="videoTitle">𝐿𝑜𝑎𝑑𝑖𝑛𝑔 𝑣𝑖𝑑𝑒𝑜...</h1>
                 </div>
 
                 <!-- Controls -->
@@ -970,34 +970,34 @@
                     <div class="control-buttons">
                         <button class="control-btn play-btn" id="playBtn" onclick="togglePlay()">
                             <span id="playIcon">▶</span>
-                            <span id="playText">Play</span>
+                            <span id="playText">𝙋𝙡𝙖𝙮</span>
                         </button>
                         <button class="control-btn btn-icon" id="prevBtn" onclick="previousVideo()">
                             <span>⏮</span>
-                            Previous
+                            𝙋𝙧𝙚𝙫𝙞𝙤𝙪𝙨
                         </button>
                         <button class="control-btn btn-icon" id="nextBtn" onclick="nextVideo()">
                             <span>⏭</span>
-                            Next
+                            𝙉𝙚𝙭𝙩
                         </button>
                         <button class="control-btn btn-icon" onclick="requestSync()">
-                            <span>🔄</span>
-                            Sync
+                            <span>꩜</span>
+                            𝙎𝙮𝙣𝙘
                         </button>
                     </div>
                     <div class="search-section">
-                        <input type="text" id="videoInput" placeholder="Paste YouTube URL, Video ID, or Playlist URL" />
+                        <input type="text" id="videoInput" placeholder="𝑃𝑎𝑠𝑡𝑒 𝑌𝑜𝑢𝑇𝑢𝑏𝑒 𝑈𝑅𝐿, 𝑉𝑖𝑑𝑒𝑜 𝐼𝐷, 𝑜𝑟 𝑃𝑙𝑎𝑦𝑙𝑖𝑠𝑡 𝑈𝑅𝐿" />
                         <button class="btn-secondary" id="loadBtn" onclick="changeVideo()">
-                            Load
+                            𝐋𝐨𝐚𝐝
                         </button>
                         <button class="btn-success" id="searchBtn" onclick="openSearch()" style="display:none;">
-                            🔍 Search
+                            🔍 𝐒𝐞𝐚𝐫𝐜𝐡
                         </button>
                     </div>
                 </div>
 
                 <div class="info-box">
-                    <h3>How it works</h3>
+                    <h3>𝙃𝙤𝙬 𝙞𝙩 𝙬𝙤𝙧𝙠𝙨 - </h3>
                     <ul>
                         <li>Room creator (admin) has exclusive control over playback</li>
                         <li>Admin can play, pause, seek, change videos, and load playlists</li>
@@ -1011,17 +1011,17 @@
             <div class="sidebar">
                 <!-- Users Panel -->
                 <div class="users-panel">
-                    <h3>👥 Viewers (<span id="userCountSidebar">0</span>)</h3>
+                    <h3>👥 𝑽𝒊𝒆𝒘𝒆𝒓𝒔 (<span id="userCountSidebar">0</span>)</h3>
                     <div id="usersList"></div>
                 </div>
 
                 <!-- Chat Panel -->
                 <div class="chat-panel">
-                    <h3>💬 Chat</h3>
+                    <h3>💬 𝑪𝒉𝒂𝒕</h3>
                     <div class="chat-messages" id="chatMessages"></div>
                     <div class="chat-input-container">
                         <input type="text" id="chatInput" placeholder="Type a message..." maxlength="200" />
-                        <button class="btn-primary" onclick="sendMessage()">Send</button>
+                        <button class="btn-primary" onclick="sendMessage()">𝐒𝐞𝐧𝐝</button>
                     </div>
                 </div>
             </div>
@@ -1032,7 +1032,7 @@
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>⚙️ Admin Settings</h3>
+                <h3>⚙️ 𝐀𝐝𝐦𝐢𝐧 𝐒𝐞𝐭𝐭𝐢𝐧𝐠𝐬</h3>
                 <button class="modal-close" onclick="closeSettings()">×</button>
             </div>
 
@@ -1045,13 +1045,13 @@
             </div>
 
             <div class="settings-group">
-                <label>YouTube API Key (Optional)</label>
-                <input type="password" id="apiKeyInput" placeholder="Paste your YouTube Data API v3 key" />
+                <label>𝒀𝒐𝒖𝑻𝒖𝒃𝒆 𝑨𝑷𝑰 𝑲𝒆𝒚 (Optional)</label>
+                <input type="password" id="apiKeyInput" placeholder="𝑃𝑎𝑠𝑡𝑒 𝑦𝑜𝑢𝑟 𝑌𝑜𝑢𝑇𝑢𝑏𝑒 𝐷𝑎𝑡𝑎 𝐴𝑃𝐼 𝑣3 𝑘𝑒𝑦𝑌𝑜𝑢𝑇𝑢𝑏𝑒 𝐴𝑃𝐼 𝐾𝑒𝑦" />
                 <small>Pro features: Search videos, better playlist loading, video metadata. Your key is stored locally and never shared.</small>
             </div>
 
             <div style="display: flex; gap: 12px;">
-                <button class="btn-primary" onclick="saveApiKey()" style="flex: 1;">💾 Save Key</button>
+                <button class="btn-primary" onclick="saveApiKey()" style="flex: 1;">💾 𝐒𝐚𝐯𝐞 𝐊𝐞𝐲</button>
                 <button class="btn-icon" onclick="clearApiKey()" id="clearBtn" style="display:none;">🗑️ Clear</button>
             </div>
 
@@ -1059,9 +1059,9 @@
                 <h4>🔑 How to get a FREE API key:</h4>
                 <ol>
                     <li>Go to <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a></li>
-                    <li>Create a new project (or select existing)</li>
+                    <li>Create your own project </li>
                     <li>Enable "YouTube Data API v3"</li>
-                    <li>Create credentials → API Key</li>
+                    <li>And Claim Your → API Key</li>
                     <li>Copy and paste the key above</li>
                 </ol>
                 <small style="display:block; margin-top:8px; color:#717171;">Free tier: 10,000 quota units/day (enough for hundreds of searches)</small>
@@ -1073,13 +1073,13 @@
     <div class="modal" id="searchModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>🔍 Search YouTube</h3>
+                <h3>🔍 𝐒𝐞𝐚𝐫𝐜𝐡 𝐘𝐨𝐮𝐓𝐮𝐛𝐞</h3>
                 <button class="modal-close" onclick="closeSearch()">×</button>
             </div>
 
             <div style="margin-bottom: 20px;">
                 <input type="text" id="searchQueryInput" placeholder="Search for videos..." style="width: 100%; margin-bottom: 12px;" />
-                <button class="btn-primary" onclick="performSearch()" style="width: 100%;">🔍 Search</button>
+                <button class="btn-primary" onclick="performSearch()" style="width: 100%;">🔍 𝐒𝐞𝐚𝐫𝐜𝐡</button>
             </div>
 
             <div id="searchResults" class="search-results"></div>

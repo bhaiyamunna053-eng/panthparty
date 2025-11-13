@@ -24,7 +24,7 @@ class Room {
     this.roomId = roomId;
     this.users = new Map(); // socketId -> {nickname, isAdmin}
     this.admin = adminId;
-    this.currentVideo = 'dQw4w9WgXcQ'; // Default video
+    this.currentVideo = 'uzwgt8uGt90'; // Default video
     this.playlist = []; // Array of video IDs
     this.currentPlaylistIndex = 0;
     this.isPlaying = false;
@@ -382,5 +382,6 @@ process.on('SIGTERM', () => {
     process.exit(0);
   });
 });
+
 
 module.exports = { app, io };

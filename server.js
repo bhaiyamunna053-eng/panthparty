@@ -255,6 +255,7 @@ io.on('connection', (socket) => {
     
     // Notify all users in room
     io.to(targetRoomId).emit('user-joined', {
+      socketId: socket.id,
       username: username,
       role: userInfo.role,
       adminCount: targetRoom.admins.size,

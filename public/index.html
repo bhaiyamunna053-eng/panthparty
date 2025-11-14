@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>𝐏𝐀𝐍𝐓𝐇 𝐏𝐀𝐑𝐓𝐘 ➤ 𝑊𝑎𝑡𝑐ℎ 𝑌𝑜𝑢𝑇𝑢𝑏𝑒 𝑇𝑜𝑔𝑒𝑡ℎ𝑒𝑟 </title>
+    <title>PANTHPARTY - Watch YouTube Together</title>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
         * {
@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1280px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -54,37 +54,72 @@
             font-size: 20px;
         }
 
-        /* Join Section */
-        .join-section {
-            max-width: 500px;
-            margin: 60px auto;
+        /* Join/Create Section */
+        .auth-section {
+            max-width: 550px;
+            margin: 40px auto;
             background: #212121;
             border-radius: 12px;
             padding: 40px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         }
 
-        .join-section h2 {
+        .auth-section h2 {
             font-size: 24px;
             font-weight: 500;
             margin-bottom: 8px;
             color: #f1f1f1;
         }
 
-        .join-section p {
+        .auth-section p {
             color: #aaa;
             font-size: 14px;
             margin-bottom: 24px;
         }
 
-        .input-group {
+        .tab-buttons {
             display: flex;
-            flex-direction: column;
             gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #303030;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: #ff0000;
+            border-bottom-color: #ff0000;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
             margin-bottom: 16px;
         }
 
-        input, textarea {
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            width: 100%;
             padding: 12px 16px;
             border: 1px solid #303030;
             background: #121212;
@@ -93,14 +128,13 @@
             color: #f1f1f1;
             outline: none;
             transition: border-color 0.2s;
-            font-family: inherit;
         }
 
-        input:focus, textarea:focus {
+        input:focus, select:focus {
             border-color: #ff0000;
         }
 
-        input::placeholder, textarea::placeholder {
+        input::placeholder {
             color: #717171;
         }
 
@@ -119,15 +153,11 @@
         .btn-primary {
             background: #ff0000;
             color: white;
+            width: 100%;
         }
 
         .btn-primary:hover {
             background: #cc0000;
-        }
-
-        .btn-primary:disabled {
-            background: #555;
-            cursor: not-allowed;
         }
 
         .btn-secondary {
@@ -152,35 +182,23 @@
             background: #4f4f4f;
         }
 
-        .btn-success {
-            background: #00a650;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #008a43;
-        }
-
         button:active {
             transform: scale(0.98);
         }
 
-        /* App Section */
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .app-section {
             display: none;
         }
 
         .app-section.active {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 20px;
+            display: block;
         }
 
-        .main-content {
-            min-width: 0;
-        }
-
-        /* Room Info Bar */
         .room-info {
             background: #212121;
             border-radius: 12px;
@@ -200,34 +218,44 @@
             color: #f1f1f1;
         }
 
+        .room-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         .admin-badge {
-            display: inline-block;
             background: #ff0000;
             color: white;
             padding: 2px 8px;
             border-radius: 4px;
-            font-size: 11px;
-            margin-left: 8px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .user-badge {
+            background: #3f3f3f;
+            color: #f1f1f1;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
         }
 
         .pro-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             padding: 2px 8px;
             border-radius: 4px;
-            font-size: 11px;
-            margin-left: 8px;
-            font-weight: 600;
-        }
-
-        .user-count {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: #aaa;
+            font-size: 12px;
+            font-weight: bold;
         }
 
         .status-dot {
@@ -243,9 +271,10 @@
             50% { opacity: 0.3; }
         }
 
-        .room-actions {
-            display: flex;
-            gap: 8px;
+        .timer-display {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ff0000;
         }
 
         .btn-leave {
@@ -257,17 +286,6 @@
             background: #ff0000;
         }
 
-        .btn-settings {
-            background: #3f3f3f;
-            color: #f1f1f1;
-            padding: 12px 16px;
-        }
-
-        .btn-settings:hover {
-            background: #4f4f4f;
-        }
-
-        /* Video Container */
         .video-container {
             background: #000;
             border-radius: 12px;
@@ -297,7 +315,6 @@
             color: #f1f1f1;
         }
 
-        /* Controls Section */
         .controls {
             background: #212121;
             border-radius: 12px;
@@ -314,18 +331,12 @@
         }
 
         .control-btn {
-            min-width: 110px;
+            min-width: 140px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
             font-size: 14px;
-            padding: 10px 16px;
-        }
-
-        .control-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
         }
 
         .play-btn {
@@ -348,402 +359,11 @@
             flex: 1;
         }
 
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.2s ease;
+        .api-section {
+            padding-top: 16px;
+            border-top: 1px solid #303030;
         }
 
-        .modal.show {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
-            background: #212121;
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-content::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .modal-content::-webkit-scrollbar-track {
-            background: #121212;
-            border-radius: 4px;
-        }
-
-        .modal-content::-webkit-scrollbar-thumb {
-            background: #3f3f3f;
-            border-radius: 4px;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h3 {
-            font-size: 20px;
-            font-weight: 500;
-            color: #f1f1f1;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: #aaa;
-            font-size: 28px;
-            cursor: pointer;
-            padding: 0;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-        }
-
-        .modal-close:hover {
-            background: #3f3f3f;
-            color: #f1f1f1;
-        }
-
-        .settings-group {
-            margin-bottom: 24px;
-        }
-
-        .settings-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #f1f1f1;
-        }
-
-        .settings-group small {
-            display: block;
-            font-size: 12px;
-            color: #717171;
-            margin-top: 6px;
-            line-height: 1.5;
-        }
-
-        .api-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 16px;
-            background: #121212;
-            border-radius: 8px;
-            margin-bottom: 16px;
-        }
-
-        .api-status.active {
-            background: rgba(0, 166, 80, 0.1);
-            border: 1px solid #00a650;
-        }
-
-        .api-status.inactive {
-            background: rgba(255, 153, 0, 0.1);
-            border: 1px solid #ff9900;
-        }
-
-        .status-icon {
-            font-size: 20px;
-        }
-
-        .status-text {
-            flex: 1;
-        }
-
-        .status-text strong {
-            display: block;
-            font-size: 14px;
-            margin-bottom: 2px;
-        }
-
-        .status-text span {
-            font-size: 12px;
-            color: #aaa;
-        }
-
-        /* Search Results */
-        .search-results {
-            display: grid;
-            gap: 12px;
-            max-height: 60vh;
-            overflow-y: auto;
-            padding-right: 8px;
-        }
-
-        .search-results::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .search-results::-webkit-scrollbar-track {
-            background: #121212;
-            border-radius: 3px;
-        }
-
-        .search-results::-webkit-scrollbar-thumb {
-            background: #3f3f3f;
-            border-radius: 3px;
-        }
-
-        .search-item {
-            display: flex;
-            gap: 12px;
-            background: #121212;
-            border-radius: 8px;
-            padding: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .search-item:hover {
-            background: #1a1a1a;
-            transform: translateX(4px);
-        }
-
-        .search-thumbnail {
-            width: 120px;
-            height: 68px;
-            border-radius: 6px;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .search-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .search-title {
-            font-size: 14px;
-            font-weight: 500;
-            color: #f1f1f1;
-            margin-bottom: 4px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-
-        .search-channel {
-            font-size: 12px;
-            color: #aaa;
-            margin-bottom: 4px;
-        }
-
-        .search-meta {
-            font-size: 11px;
-            color: #717171;
-        }
-
-        .search-loading {
-            text-align: center;
-            padding: 40px;
-            color: #aaa;
-        }
-
-        .search-empty {
-            text-align: center;
-            padding: 40px;
-            color: #aaa;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        /* Users Panel */
-        .users-panel {
-            background: #212121;
-            border-radius: 12px;
-            padding: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .users-panel h3 {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 16px;
-            color: #f1f1f1;
-        }
-
-        .user-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            background: #121212;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
-            color: white;
-        }
-
-        .user-info {
-            flex: 1;
-        }
-
-        .user-name {
-            font-size: 14px;
-            color: #f1f1f1;
-        }
-
-        /* Chat Panel */
-        .chat-panel {
-            background: #212121;
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 420px);
-            min-height: 400px;
-        }
-
-        .chat-panel h3 {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 16px;
-            color: #f1f1f1;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: 16px;
-            padding-right: 8px;
-        }
-
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .chat-messages::-webkit-scrollbar-track {
-            background: #121212;
-            border-radius: 3px;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: #3f3f3f;
-            border-radius: 3px;
-        }
-
-        .chat-message {
-            margin-bottom: 12px;
-            animation: messageIn 0.2s ease;
-        }
-
-        @keyframes messageIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .chat-message.system {
-            text-align: center;
-            color: #717171;
-            font-size: 13px;
-            font-style: italic;
-        }
-
-        .chat-message.user .message-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 4px;
-        }
-
-        .chat-message.user .message-author {
-            font-size: 13px;
-            font-weight: 600;
-            color: #3ea6ff;
-        }
-
-        .chat-message.user .message-author.admin {
-            color: #ff0000;
-        }
-
-        .chat-message.user .message-text {
-            font-size: 14px;
-            color: #f1f1f1;
-            background: #121212;
-            padding: 8px 12px;
-            border-radius: 8px;
-            word-wrap: break-word;
-        }
-
-        .chat-input-container {
-            display: flex;
-            gap: 8px;
-        }
-
-        .chat-input-container input {
-            flex: 1;
-        }
-
-        .chat-input-container button {
-            padding: 12px 20px;
-        }
-
-        /* Info Box */
         .info-box {
             background: #212121;
             border-radius: 12px;
@@ -778,7 +398,6 @@
             font-weight: bold;
         }
 
-        /* Notification */
         .notification {
             position: fixed;
             bottom: 24px;
@@ -799,6 +418,14 @@
             display: block;
         }
 
+        .notification.warning {
+            border-left-color: #ffa500;
+        }
+
+        .notification.error {
+            border-left-color: #ff0000;
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateX(400px);
@@ -813,57 +440,7 @@
         .helper-text {
             font-size: 13px;
             color: #717171;
-            margin-top: 12px;
-            text-align: center;
-        }
-
-        .api-help {
-            background: rgba(58, 166, 255, 0.1);
-            border: 1px solid #3ea6ff;
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 16px;
-        }
-
-        .api-help h4 {
-            font-size: 14px;
-            color: #3ea6ff;
-            margin-bottom: 8px;
-        }
-
-        .api-help ol {
-            font-size: 13px;
-            color: #aaa;
-            line-height: 1.8;
-            padding-left: 20px;
-        }
-
-        .api-help a {
-            color: #3ea6ff;
-            text-decoration: none;
-        }
-
-        .api-help a:hover {
-            text-decoration: underline;
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .app-section.active {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                order: 2;
-            }
-
-            .main-content {
-                order: 1;
-            }
-
-            .chat-panel {
-                height: 400px;
-            }
+            margin-top: 8px;
         }
 
         @media (max-width: 768px) {
@@ -875,9 +452,9 @@
                 font-size: 1.2em;
             }
 
-            .join-section {
+            .auth-section {
                 padding: 24px;
-                margin: 30px auto;
+                margin: 20px auto;
             }
 
             .room-info {
@@ -900,16 +477,6 @@
             .search-section button {
                 width: 100%;
             }
-
-            .modal-content {
-                width: 95%;
-                padding: 20px;
-            }
-
-            .search-thumbnail {
-                width: 100px;
-                height: 56px;
-            }
         }
     </style>
 </head>
@@ -918,360 +485,175 @@
         <div class="header">
             <div class="logo">
                 <div class="logo-icon">▶</div>
-                <span>𝐏𝐀𝐍𝐓𝐇 𝐏𝐀𝐑𝐓𝐘</span>
+                <span>PANTHPARTY</span>
             </div>
         </div>
 
-        <!-- Join Section -->
-        <div class="join-section" id="joinSection">
-            <h2>𝐉𝐨𝐢𝐧 𝐨𝐫 𝐂𝐫𝐞𝐚𝐭𝐞 𝐚 𝐏𝐚𝐫𝐭𝐲 𝐑𝐨𝐨𝐦</h2>
-            <p> 𝑊𝑎𝑡𝑐ℎ 𝑌𝑜𝑢𝑇𝑢𝑏𝑒 𝑣𝑖𝑑𝑒𝑜𝑠 𝑡𝑜𝑔𝑒𝑡ℎ𝑒𝑟 𝑤𝑖𝑡ℎ 𝑓𝑟𝑖𝑒𝑛𝑑𝑠 𝑖𝑛 𝑟𝑒𝑎𝑙-𝑡𝑖𝑚𝑒 </p>
-            <div class="input-group">
-                <input type="text" id="nicknameInput" placeholder="Enter your nickname" maxlength="20" />
-                <input type="text" id="roomInput" placeholder="Enter Room ID (e.g., movie-night-2024)" />
-                <button class="btn-primary" onclick="joinRoom()">Join Party</button>
+        <!-- Auth Section -->
+        <div class="auth-section" id="authSection">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('create')">Create Room</button>
+                <button class="tab-btn" onclick="switchTab('join')">Join Room</button>
             </div>
-            <p class="helper-text"> ☕︎ 𝘚𝘩𝘢𝘳𝘦 𝘵𝘩𝘦 𝘴𝘢𝘮𝘦 𝘙𝘰𝘰𝘮 𝘐𝘋 𝘸𝘪𝘵𝘩 𝘧𝘳𝘪𝘦𝘯𝘥𝘴 𝘵𝘰 𝘸𝘢𝘵𝘤𝘩 𝘵𝘰𝘨𝘦𝘵𝘩𝘦𝘳 </p>
+
+            <!-- Create Room Tab -->
+            <div class="tab-content active" id="createTab">
+                <h2>Create a Party Room</h2>
+                <p>Set up a new room and become the admin</p>
+                
+                <div class="form-group">
+                    <label>Room Name *</label>
+                    <input type="text" id="createRoomName" placeholder="e.g., movie-night" />
+                </div>
+                
+                <div class="form-group">
+                    <label>Your Username *</label>
+                    <input type="text" id="createUsername" placeholder="Enter your name" />
+                </div>
+                
+                <div class="form-group">
+                    <label>Admin Password *</label>
+                    <input type="password" id="createAdminPassword" placeholder="Set admin password" />
+                    <p class="helper-text">Share this with other admins only</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Joining ID *</label>
+                    <input type="text" id="createJoiningId" placeholder="e.g., party123" />
+                    <p class="helper-text">Share this with all participants</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Room Duration (minutes) *</label>
+                    <input type="number" id="createDuration" placeholder="60" min="5" max="1440" value="60" />
+                    <p class="helper-text">Room will auto-destroy after this time</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>API Key (Optional - For PRO mode)</label>
+                    <input type="password" id="createApiKey" placeholder="Enter API key for advanced features" />
+                    <p class="helper-text">Enables PRO features for all admins</p>
+                </div>
+                
+                <button class="btn-primary" onclick="createRoom()">Create Room</button>
+            </div>
+
+            <!-- Join Room Tab -->
+            <div class="tab-content" id="joinTab">
+                <h2>Join a Party Room</h2>
+                <p>Enter room details to join as admin or viewer</p>
+                
+                <div class="form-group">
+                    <label>Room Name *</label>
+                    <input type="text" id="joinRoomName" placeholder="Enter room name" />
+                </div>
+                
+                <div class="form-group">
+                    <label>Your Username *</label>
+                    <input type="text" id="joinUsername" placeholder="Enter your name" />
+                </div>
+                
+                <div class="form-group">
+                    <label>Joining ID *</label>
+                    <input type="text" id="joinJoiningId" placeholder="Enter joining ID" />
+                </div>
+                
+                <div class="form-group">
+                    <label>Admin Password (Optional)</label>
+                    <input type="password" id="joinAdminPassword" placeholder="Leave empty to join as viewer" />
+                    <p class="helper-text">Only enter if you're an admin</p>
+                </div>
+                
+                <button class="btn-primary" onclick="joinRoom()">Join Room</button>
+            </div>
         </div>
 
         <!-- App Section -->
         <div class="app-section" id="appSection">
-            <div class="main-content">
-                <!-- Room Info Bar -->
-                <div class="room-info">
-                    <div class="room-details">
-                        <h3>
-                            Room: <span id="currentRoom"></span>
-                            <span id="adminBadge" class="admin-badge" style="display:none;">ADMIN</span>
-                            <span id="proBadge" class="pro-badge" style="display:none;">PRO</span>
-                        </h3>
-                        <div class="user-count">
+            <div class="room-info">
+                <div class="room-details">
+                    <h3>Room: <span id="currentRoom"></span></h3>
+                    <div class="room-meta">
+                        <div class="meta-item">
                             <span class="status-dot"></span>
-                            <span id="userCount">1</span> 𝒘𝒂𝒕𝒄𝒉𝒊𝒏𝒈
+                            <span id="userCount">0</span> watching
+                        </div>
+                        <div class="meta-item">
+                            <span id="roleDisplay"></span>
+                        </div>
+                        <div class="meta-item" id="proModeDisplay" style="display: none;">
+                            <span class="pro-badge">PRO</span>
+                        </div>
+                        <div class="meta-item">
+                            ⏱️ <span class="timer-display" id="timerDisplay">00:00</span>
                         </div>
                     </div>
-                    <div class="room-actions">
-                        <button class="btn-settings" id="settingsBtn" onclick="openSettings()" style="display:none;">⚙️</button>
-                        <button class="btn-leave" onclick="leaveRoom()">𝑳𝒆𝒂𝒗𝒆 𝑹𝒐𝒐𝒎</button>
+                </div>
+                <button class="btn-leave" onclick="leaveRoom()">Leave Room</button>
+            </div>
+
+            <div class="video-container">
+                <div id="youtube-player"></div>
+            </div>
+
+            <div class="video-info">
+                <h1 class="video-title" id="videoTitle">Loading video...</h1>
+            </div>
+
+            <div class="controls">
+                <div class="control-buttons">
+                    <button class="control-btn play-btn" id="playBtn" onclick="togglePlay()" disabled>
+                        <span id="playIcon">▶</span>
+                        <span id="playText">Play</span>
+                    </button>
+                    <button class="control-btn btn-icon" onclick="requestSync()">
+                        <span>🔄</span>
+                        Sync
+                    </button>
+                </div>
+                <div class="search-section">
+                    <input type="text" id="videoInput" placeholder="Paste YouTube URL or Video ID" />
+                    <button class="btn-secondary" id="loadVideoBtn" onclick="changeVideo()" disabled>
+                        <span>🔍</span>
+                        Load Video
+                    </button>
+                </div>
+                
+                <div class="api-section" id="apiSection" style="display: none;">
+                    <div class="form-group">
+                        <label>Update API Key (Admin Only)</label>
+                        <input type="password" id="updateApiKey" placeholder="Enter new API key" />
+                        <p class="helper-text">Updates PRO mode for all admins</p>
                     </div>
-                </div>
-
-                <!-- Video Player -->
-                <div class="video-container">
-                    <div id="youtube-player"></div>
-                </div>
-
-                <div class="video-info">
-                    <h1 class="video-title" id="videoTitle">𝐿𝑜𝑎𝑑𝑖𝑛𝑔 𝑣𝑖𝑑𝑒𝑜...</h1>
-                </div>
-
-                <!-- Controls -->
-                <div class="controls">
-                    <div class="control-buttons">
-                        <button class="control-btn play-btn" id="playBtn" onclick="togglePlay()">
-                            <span id="playIcon">▶</span>
-                            <span id="playText">𝙋𝙡𝙖𝙮</span>
-                        </button>
-                        <button class="control-btn btn-icon" id="prevBtn" onclick="previousVideo()">
-                            <span>⏮</span>
-                            𝙋𝙧𝙚𝙫𝙞𝙤𝙪𝙨
-                        </button>
-                        <button class="control-btn btn-icon" id="nextBtn" onclick="nextVideo()">
-                            <span>⏭</span>
-                            𝙉𝙚𝙭𝙩
-                        </button>
-                        <button class="control-btn btn-icon" onclick="requestSync()">
-                            <span>꩜</span>
-                            𝙎𝙮𝙣𝙘
-                        </button>
-                    </div>
-                    <div class="search-section">
-                        <input type="text" id="videoInput" placeholder="𝑃𝑎𝑠𝑡𝑒 𝑌𝑜𝑢𝑇𝑢𝑏𝑒 𝑈𝑅𝐿, 𝑉𝑖𝑑𝑒𝑜 𝐼𝐷, 𝑜𝑟 𝑃𝑙𝑎𝑦𝑙𝑖𝑠𝑡 𝑈𝑅𝐿" />
-                        <button class="btn-secondary" id="loadBtn" onclick="changeVideo()">
-                            𝐋𝐨𝐚𝐝
-                        </button>
-                        <button class="btn-success" id="searchBtn" onclick="openSearch()" style="display:none;">
-                            🔍 𝐒𝐞𝐚𝐫𝐜𝐡
-                        </button>
-                    </div>
-                </div>
-
-                <div class="info-box">
-                    <h3>𝙃𝙤𝙬 𝙞𝙩 𝙬𝙤𝙧𝙠𝙨 - </h3>
-                    <ul>
-                        <li>Room creator (admin) has exclusive control over playback</li>
-                        <li>Admin can play, pause, seek, change videos, and load playlists</li>
-                        <li id="proFeature" style="display:none;">Search YouTube directly (Pro Mode active)</li>
-                        <li>All viewers see the same video at the same time</li>
-                        <li>Chat with everyone in the room</li>
-                    </ul>
+                    <button class="btn-secondary" onclick="updateApiKey()">Update API Key</button>
                 </div>
             </div>
 
-            <div class="sidebar">
-                <!-- Users Panel -->
-                <div class="users-panel">
-                    <h3>👥 𝑽𝒊𝒆𝒘𝒆𝒓𝒔 (<span id="userCountSidebar">0</span>)</h3>
-                    <div id="usersList"></div>
-                </div>
-
-                <!-- Chat Panel -->
-                <div class="chat-panel">
-                    <h3>💬 𝑪𝒉𝒂𝒕</h3>
-                    <div class="chat-messages" id="chatMessages"></div>
-                    <div class="chat-input-container">
-                        <input type="text" id="chatInput" placeholder="Type a message..." maxlength="200" />
-                        <button class="btn-primary" onclick="sendMessage()">𝐒𝐞𝐧𝐝</button>
-                    </div>
-                </div>
+            <div class="info-box">
+                <h3>Room Information</h3>
+                <ul>
+                    <li id="infoRole">Your role: Loading...</li>
+                    <li id="infoControls">Controls: Loading...</li>
+                    <li>Room auto-destroys when: Duration expires or no admin present for 2 minutes</li>
+                    <li>PRO mode enables advanced features for all admins</li>
+                </ul>
             </div>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>⚙️ 𝐀𝐝𝐦𝐢𝐧 𝐒𝐞𝐭𝐭𝐢𝐧𝐠𝐬</h3>
-                <button class="modal-close" onclick="closeSettings()">×</button>
-            </div>
-
-            <div class="api-status" id="apiStatus">
-                <span class="status-icon">ℹ️</span>
-                <div class="status-text">
-                    <strong>Basic Mode</strong>
-                    <span>Add API key to unlock Pro features</span>
-                </div>
-            </div>
-
-            <div class="settings-group">
-                <label>𝒀𝒐𝒖𝑻𝒖𝒃𝒆 𝑨𝑷𝑰 𝑲𝒆𝒚 (Optional)</label>
-                <input type="password" id="apiKeyInput" placeholder="𝑃𝑎𝑠𝑡𝑒 𝑦𝑜𝑢𝑟 𝑌𝑜𝑢𝑇𝑢𝑏𝑒 𝐷𝑎𝑡𝑎 𝐴𝑃𝐼 𝑣3 𝑘𝑒𝑦𝑌𝑜𝑢𝑇𝑢𝑏𝑒 𝐴𝑃𝐼 𝐾𝑒𝑦" />
-                <small>Pro features: Search videos, better playlist loading, video metadata. Your key is stored locally and never shared.</small>
-            </div>
-
-            <div style="display: flex; gap: 12px;">
-                <button class="btn-primary" onclick="saveApiKey()" style="flex: 1;">💾 𝐒𝐚𝐯𝐞 𝐊𝐞𝐲</button>
-                <button class="btn-icon" onclick="clearApiKey()" id="clearBtn" style="display:none;">🗑️ Clear</button>
-            </div>
-
-            <div class="api-help">
-                <h4>🔑 How to get a FREE API key:</h4>
-                <ol>
-                    <li>Go to <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a></li>
-                    <li>Create your own project </li>
-                    <li>Enable "YouTube Data API v3"</li>
-                    <li>And Claim Your → API Key</li>
-                    <li>Copy and paste the key above</li>
-                </ol>
-                <small style="display:block; margin-top:8px; color:#717171;">Free tier: 10,000 quota units/day (enough for hundreds of searches)</small>
-            </div>
-        </div>
-    </div>
-
-    <!-- Search Modal -->
-    <div class="modal" id="searchModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>🔍 𝐒𝐞𝐚𝐫𝐜𝐡 𝐘𝐨𝐮𝐓𝐮𝐛𝐞</h3>
-                <button class="modal-close" onclick="closeSearch()">×</button>
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <input type="text" id="searchQueryInput" placeholder="Search for videos..." style="width: 100%; margin-bottom: 12px;" />
-                <button class="btn-primary" onclick="performSearch()" style="width: 100%;">🔍 𝐒𝐞𝐚𝐫𝐜𝐡</button>
-            </div>
-
-            <div id="searchResults" class="search-results"></div>
         </div>
     </div>
 
     <div class="notification" id="notification"></div>
 
     <script>
-        const SERVER_URL = 'https://panthparty-watch.onrender.com';
+        const SERVER_URL = 'http://localhost:3001';
         let socket = null;
         let player = null;
         let currentRoom = null;
-        let userNickname = null;
-        let isAdmin = false;
         let isPlaying = false;
         let isSyncing = false;
-        let youtubeApiKey = null;
+        let userRole = 'user';
+        let username = '';
+        let timerInterval = null;
 
-        // Load API key from localStorage
-        function loadApiKey() {
-            const stored = localStorage.getItem('panthparty_api_key');
-            if (stored) {
-                youtubeApiKey = stored;
-                updateProMode();
-            }
-        }
-
-        // Update UI based on Pro mode
-        function updateProMode() {
-            const hasPro = !!youtubeApiKey;
-            const searchBtn = document.getElementById('searchBtn');
-            const proBadge = document.getElementById('proBadge');
-            const proFeature = document.getElementById('proFeature');
-
-            if (hasPro && isAdmin) {
-                searchBtn.style.display = 'block';
-                proBadge.style.display = 'inline-block';
-                proFeature.style.display = 'flex';
-            } else {
-                searchBtn.style.display = 'none';
-                proBadge.style.display = 'none';
-                proFeature.style.display = 'none';
-            }
-        }
-
-        // Settings Modal
-        function openSettings() {
-            if (!isAdmin) return;
-            const modal = document.getElementById('settingsModal');
-            const input = document.getElementById('apiKeyInput');
-            const clearBtn = document.getElementById('clearBtn');
-            const apiStatus = document.getElementById('apiStatus');
-
-            if (youtubeApiKey) {
-                input.value = '••••••••••••••••';
-                clearBtn.style.display = 'block';
-                apiStatus.className = 'api-status active';
-                apiStatus.innerHTML = `
-                    <span class="status-icon">✅</span>
-                    <div class="status-text">
-                        <strong>Pro Mode Active</strong>
-                        <span>Search and enhanced features enabled</span>
-                    </div>
-                `;
-            } else {
-                input.value = '';
-                clearBtn.style.display = 'none';
-                apiStatus.className = 'api-status inactive';
-                apiStatus.innerHTML = `
-                    <span class="status-icon">ℹ️</span>
-                    <div class="status-text">
-                        <strong>Basic Mode</strong>
-                        <span>Add API key to unlock Pro features</span>
-                    </div>
-                `;
-            }
-
-            modal.classList.add('show');
-        }
-
-        function closeSettings() {
-            document.getElementById('settingsModal').classList.remove('show');
-        }
-
-        function saveApiKey() {
-            const input = document.getElementById('apiKeyInput');
-            const key = input.value.trim();
-
-            if (key && key !== '••••••••••••••••') {
-                localStorage.setItem('panthparty_api_key', key);
-                youtubeApiKey = key;
-                showNotification('✅ API Key saved! Pro Mode activated');
-                updateProMode();
-                closeSettings();
-            } else if (!key) {
-                showNotification('⚠️ Please enter an API key');
-            }
-        }
-
-        function clearApiKey() {
-            if (confirm('Remove API key and disable Pro Mode?')) {
-                localStorage.removeItem('panthparty_api_key');
-                youtubeApiKey = null;
-                showNotification('🗑️ API Key removed');
-                updateProMode();
-                closeSettings();
-            }
-        }
-
-        // Search Modal
-        function openSearch() {
-            if (!isAdmin || !youtubeApiKey) return;
-            const modal = document.getElementById('searchModal');
-            const resultsDiv = document.getElementById('searchResults');
-            resultsDiv.innerHTML = '<div class="search-empty">🔍 Search for videos to get started</div>';
-            modal.classList.add('show');
-            document.getElementById('searchQueryInput').focus();
-        }
-
-        function closeSearch() {
-            document.getElementById('searchModal').classList.remove('show');
-        }
-
-        async function performSearch() {
-            const query = document.getElementById('searchQueryInput').value.trim();
-            if (!query) {
-                showNotification('⚠️ Enter a search term');
-                return;
-            }
-
-            const resultsDiv = document.getElementById('searchResults');
-            resultsDiv.innerHTML = '<div class="search-loading">🔄 Searching YouTube...</div>';
-
-            try {
-                const response = await fetch(
-                    `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(query)}&type=video&key=${youtubeApiKey}`
-                );
-
-                if (!response.ok) {
-                    throw new Error('API request failed');
-                }
-
-                const data = await response.json();
-
-                if (!data.items || data.items.length === 0) {
-                    resultsDiv.innerHTML = '<div class="search-empty">😕 No results found</div>';
-                    return;
-                }
-
-                resultsDiv.innerHTML = '';
-                data.items.forEach(item => {
-                    const videoId = item.id.videoId;
-                    const title = item.snippet.title;
-                    const channel = item.snippet.channelTitle;
-                    const thumbnail = item.snippet.thumbnails.medium.url;
-                    const publishedAt = new Date(item.snippet.publishedAt).toLocaleDateString();
-
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'search-item';
-                    itemDiv.onclick = () => loadSearchedVideo(videoId);
-                    itemDiv.innerHTML = `
-                        <img src="${thumbnail}" alt="${title}" class="search-thumbnail">
-                        <div class="search-info">
-                            <div class="search-title">${title}</div>
-                            <div class="search-channel">${channel}</div>
-                            <div class="search-meta">Published ${publishedAt}</div>
-                        </div>
-                    `;
-                    resultsDiv.appendChild(itemDiv);
-                });
-
-            } catch (error) {
-                console.error('Search error:', error);
-                resultsDiv.innerHTML = '<div class="search-empty">❌ Search failed. Check your API key.</div>';
-                showNotification('❌ Search failed. Check API key in settings.');
-            }
-        }
-
-        function loadSearchedVideo(videoId) {
-            if (player && player.loadVideoById) {
-                player.loadVideoById(videoId);
-                socket.emit('video-change', { videoId: videoId });
-                isPlaying = false;
-                updatePlayButton();
-                closeSearch();
-                showNotification('🎬 Loading video from search...');
-                setTimeout(updateVideoTitle, 1000);
-            }
-        }
-
-        // YouTube API
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
         const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -1279,6 +661,19 @@
 
         function onYouTubeIframeAPIReady() {
             console.log('YouTube API Ready');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tab === 'create') {
+                document.querySelector('.tab-btn:first-child').classList.add('active');
+                document.getElementById('createTab').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:last-child').classList.add('active');
+                document.getElementById('joinTab').classList.add('active');
+            }
         }
 
         function initPlayer(videoId = 'dQw4w9WgXcQ') {
@@ -1309,7 +704,7 @@
         }
 
         function onPlayerStateChange(event) {
-            if (isSyncing || !isAdmin) return;
+            if (isSyncing || userRole !== 'admin') return;
 
             const state = event.data;
             
@@ -1323,8 +718,6 @@
                 updatePlayButton();
                 const time = player.getCurrentTime();
                 socket.emit('pause', { time: time });
-            } else if (state === YT.PlayerState.ENDED) {
-                socket.emit('next-video');
             }
         }
 
@@ -1335,76 +728,92 @@
             }
         }
 
-        function joinRoom() {
-            const roomId = document.getElementById('roomInput').value.trim();
-            const nickname = document.getElementById('nicknameInput').value.trim();
-            
-            if (!nickname) {
-                showNotification('⚠️ Please enter your nickname');
-                return;
-            }
-            
-            if (!roomId) {
-                showNotification('⚠️ Please enter a room ID');
+        function createRoom() {
+            const roomName = document.getElementById('createRoomName').value.trim();
+            const username = document.getElementById('createUsername').value.trim();
+            const adminPassword = document.getElementById('createAdminPassword').value.trim();
+            const joiningId = document.getElementById('createJoiningId').value.trim();
+            const duration = parseInt(document.getElementById('createDuration').value) || 60;
+            const apiKey = document.getElementById('createApiKey').value.trim();
+
+            if (!roomName || !username || !adminPassword || !joiningId) {
+                showNotification('⚠️ Please fill all required fields', 'error');
                 return;
             }
 
-            currentRoom = roomId;
-            userNickname = nickname;
-            
+            if (duration < 5 || duration > 1440) {
+                showNotification('⚠️ Duration must be between 5 and 1440 minutes', 'error');
+                return;
+            }
+
+            connectToServer();
+            socket.emit('create-room', {
+                roomName,
+                username,
+                adminPassword,
+                joiningId,
+                duration,
+                apiKey: apiKey || null
+            });
+        }
+
+        function joinRoom() {
+            const roomName = document.getElementById('joinRoomName').value.trim();
+            const username = document.getElementById('joinUsername').value.trim();
+            const joiningId = document.getElementById('joinJoiningId').value.trim();
+            const adminPassword = document.getElementById('joinAdminPassword').value.trim();
+
+            if (!roomName || !username || !joiningId) {
+                showNotification('⚠️ Please fill all required fields', 'error');
+                return;
+            }
+
+            connectToServer();
+            socket.emit('join-room', {
+                roomName,
+                username,
+                joiningId,
+                adminPassword: adminPassword || null
+            });
+        }
+
+        function connectToServer() {
+            if (socket) return;
+
             socket = io(SERVER_URL);
 
             socket.on('connect', () => {
                 console.log('Connected to server');
-                socket.emit('join-room', { roomId, nickname });
-                
-                document.getElementById('joinSection').classList.remove('active');
-                document.getElementById('appSection').classList.add('active');
-                document.getElementById('currentRoom').textContent = roomId;
             });
 
-            socket.on('room-state', (state) => {
-                console.log('Received room state:', state);
-                isAdmin = state.admin === socket.id;
-                updateControlsAccess();
-                
-                initPlayer(state.videoId);
-                
-                setTimeout(() => {
-                    if (player && player.seekTo) {
-                        isSyncing = true;
-                        player.seekTo(state.currentTime, true);
-                        
-                        if (state.isPlaying) {
-                            player.playVideo();
-                            isPlaying = true;
-                        } else {
-                            player.pauseVideo();
-                            isPlaying = false;
-                        }
-                        
-                        updatePlayButton();
-                        updateVideoTitle();
-                        setTimeout(() => { isSyncing = false; }, 1000);
-                    }
-                }, 1000);
+            socket.on('room-created', (data) => {
+                handleRoomEntry(data);
             });
 
-            socket.on('user-list-update', (data) => {
-                document.getElementById('userCount').textContent = data.users.length;
-                document.getElementById('userCountSidebar').textContent = data.users.length;
+            socket.on('room-joined', (data) => {
+                handleRoomEntry(data);
+            });
+
+            socket.on('join-error', (data) => {
+                showNotification('❌ ' + data.message, 'error');
+                if (socket) {
+                    socket.disconnect();
+                    socket = null;
+                }
+            });
+
+            socket.on('user-joined', (data) => {
+                updateUserCount(data);
+                showNotification(`${data.username} joined as ${data.role}`, 'info');
+            });
+
+            socket.on('user-left', (data) => {
+                updateUserCount(data);
+                showNotification(`${data.username} left the room`, 'info');
                 
-                isAdmin = data.admin === socket.id;
-                updateControlsAccess();
-                updateUsersList(data.users);
-            });
-
-            socket.on('chat-history', (messages) => {
-                messages.forEach(msg => displayChatMessage(msg));
-            });
-
-            socket.on('chat-message', (message) => {
-                displayChatMessage(message);
+                if (data.noAdminWarning) {
+                    showNotification('⚠️ No admin in room! Room will be destroyed in 2 minutes', 'warning');
+                }
             });
 
             socket.on('play', (data) => {
@@ -1435,19 +844,8 @@
                     player.loadVideoById(data.videoId);
                     isPlaying = false;
                     updatePlayButton();
+                    showNotification(`📹 ${data.from} changed the video`, 'info');
                     setTimeout(() => { 
-                        isSyncing = false;
-                        updateVideoTitle();
-                    }, 1000);
-                }
-            });
-
-            socket.on('playlist-loaded', (data) => {
-                showNotification(`📋 Playlist loaded (${data.playlist.length} videos)`);
-                if (player && player.loadVideoById) {
-                    isSyncing = true;
-                    player.loadVideoById(data.videoId);
-                    setTimeout(() => {
                         isSyncing = false;
                         updateVideoTitle();
                     }, 1000);
@@ -1476,121 +874,139 @@
                     }
                     
                     updatePlayButton();
-                    showNotification('✅ Synced!');
+                    showNotification('✅ Synced!', 'info');
                     setTimeout(() => { isSyncing = false; }, 1000);
                 }
             });
 
-            socket.on('error-message', (message) => {
-                showNotification('🔒 ' + message);
+            socket.on('time-update', (data) => {
+                updateTimer(data.remainingTime);
+            });
+
+            socket.on('room-destroyed', (data) => {
+                showNotification('🚨 ' + data.message, 'error');
+                setTimeout(() => {
+                    forceLeaveRoom();
+                }, 3000);
+            });
+
+            socket.on('permission-denied', (data) => {
+                showNotification('⚠️ ' + data.message, 'warning');
+            });
+
+            socket.on('pro-mode-updated', (data) => {
+                const proDisplay = document.getElementById('proModeDisplay');
+                proDisplay.style.display = data.hasProMode ? 'flex' : 'none';
+                showNotification('✅ ' + data.message, 'info');
             });
 
             socket.on('disconnect', () => {
-                showNotification('⚠️ Disconnected from server');
+                showNotification('⚠️ Disconnected from server', 'warning');
             });
 
             socket.on('connect_error', (error) => {
-                showNotification('❌ Connection error! Make sure server is running.');
+                showNotification('❌ Connection error! Make sure server is running.', 'error');
                 console.error('Connection error:', error);
             });
         }
 
-        function updateControlsAccess() {
-            const adminBadge = document.getElementById('adminBadge');
-            const settingsBtn = document.getElementById('settingsBtn');
-            const controls = ['playBtn', 'prevBtn', 'nextBtn', 'loadBtn'];
-            
-            if (isAdmin) {
-                adminBadge.style.display = 'inline-block';
-                settingsBtn.style.display = 'block';
-                controls.forEach(id => {
-                    document.getElementById(id).disabled = false;
-                });
-                updateProMode();
-            } else {
-                adminBadge.style.display = 'none';
-                settingsBtn.style.display = 'none';
-                controls.forEach(id => {
-                    document.getElementById(id).disabled = true;
-                });
-            }
-        }
+        function handleRoomEntry(data) {
+            currentRoom = data.roomId;
+            userRole = data.role;
+            username = data.username;
 
-        function updateUsersList(users) {
-            const usersList = document.getElementById('usersList');
-            usersList.innerHTML = '';
-            
-            users.forEach(user => {
-                const userItem = document.createElement('div');
-                userItem.className = 'user-item';
-                
-                const avatar = document.createElement('div');
-                avatar.className = 'user-avatar';
-                avatar.textContent = user.nickname.charAt(0).toUpperCase();
-                
-                const userInfo = document.createElement('div');
-                userInfo.className = 'user-info';
-                
-                const userName = document.createElement('div');
-                userName.className = 'user-name';
-                userName.textContent = user.nickname;
-                
-                if (user.isAdmin) {
-                    const badge = document.createElement('span');
-                    badge.className = 'admin-badge';
-                    badge.textContent = 'ADMIN';
-                    badge.style.marginLeft = '8px';
-                    userName.appendChild(badge);
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('appSection').classList.add('active');
+            document.getElementById('currentRoom').textContent = data.roomName;
+
+            const roleDisplay = document.getElementById('roleDisplay');
+            if (data.role === 'admin') {
+                roleDisplay.innerHTML = '<span class="admin-badge">ADMIN</span>';
+                document.getElementById('apiSection').style.display = 'block';
+                enableAdminControls();
+            } else {
+                roleDisplay.innerHTML = '<span class="user-badge">VIEWER</span>';
+                document.getElementById('apiSection').style.display = 'none';
+                disableAdminControls();
+            }
+
+            const proDisplay = document.getElementById('proModeDisplay');
+            proDisplay.style.display = data.hasProMode ? 'flex' : 'none';
+
+            updateUserCount(data);
+            initPlayer(data.videoId);
+
+            setTimeout(() => {
+                if (player && player.seekTo) {
+                    isSyncing = true;
+                    player.seekTo(data.currentTime, true);
+                    
+                    if (data.isPlaying) {
+                        player.playVideo();
+                        isPlaying = true;
+                    } else {
+                        player.pauseVideo();
+                        isPlaying = false;
+                    }
+                    
+                    updatePlayButton();
+                    setTimeout(() => { isSyncing = false; }, 1000);
                 }
-                
-                userInfo.appendChild(userName);
-                userItem.appendChild(avatar);
-                userItem.appendChild(userInfo);
-                usersList.appendChild(userItem);
-            });
+            }, 1000);
+
+            updateTimer(data.remainingTime);
+            startTimerUpdates();
+
+            updateRoleInfo();
+            showNotification(`✅ Joined room as ${data.role}`, 'info');
         }
 
-        function displayChatMessage(message) {
-            const chatMessages = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `chat-message ${message.type}`;
-            
-            if (message.type === 'system') {
-                messageDiv.textContent = message.message;
+        function updateUserCount(data) {
+            const totalUsers = (data.adminCount || 0) + (data.userCount || 0);
+            document.getElementById('userCount').textContent = totalUsers;
+        }
+
+        function enableAdminControls() {
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('loadVideoBtn').disabled = false;
+        }
+
+        function disableAdminControls() {
+            document.getElementById('playBtn').disabled = true;
+            document.getElementById('loadVideoBtn').disabled = true;
+        }
+
+        function updateRoleInfo() {
+            if (userRole === 'admin') {
+                document.getElementById('infoRole').textContent = 'Your role: Admin (can control playback)';
+                document.getElementById('infoControls').textContent = 'Controls: Full access to play, pause, seek, and change videos';
             } else {
-                const header = document.createElement('div');
-                header.className = 'message-header';
-                
-                const author = document.createElement('span');
-                author.className = `message-author ${message.isAdmin ? 'admin' : ''}`;
-                author.textContent = message.nickname;
-                
-                header.appendChild(author);
-                
-                const text = document.createElement('div');
-                text.className = 'message-text';
-                text.textContent = message.message;
-                
-                messageDiv.appendChild(header);
-                messageDiv.appendChild(text);
+                document.getElementById('infoRole').textContent = 'Your role: Viewer (watch only)';
+                document.getElementById('infoControls').textContent = 'Controls: Watch only - admins control playback';
+            }
+        }
+
+        function updateTimer(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function startTimerUpdates() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
             }
             
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            socket.emit('chat-message', { message });
-            input.value = '';
+            timerInterval = setInterval(() => {
+                if (socket && socket.connected) {
+                    socket.emit('request-time');
+                }
+            }, 1000);
         }
 
         function togglePlay() {
-            if (!player || !isAdmin) return;
+            if (!player || userRole !== 'admin') return;
 
             if (isPlaying) {
                 const time = player.getCurrentTime();
@@ -1620,39 +1036,21 @@
             }
         }
 
-        async function changeVideo() {
-            if (!isAdmin) return;
-            
+        function changeVideo() {
+            if (userRole !== 'admin') {
+                showNotification('⚠️ Only admins can change videos', 'warning');
+                return;
+            }
+
             const input = document.getElementById('videoInput').value.trim();
             
             if (!input) {
-                showNotification('⚠️ Please enter a video URL or ID');
+                showNotification('⚠️ Please enter a video URL or ID', 'error');
                 return;
             }
 
-            // Check if it's a playlist URL
-            const playlistMatch = input.match(/[?&]list=([^&]+)/);
-            if (playlistMatch) {
-                const playlistId = playlistMatch[1];
-                showNotification('📋 Loading playlist...');
-                
-                try {
-                    const videoIds = await fetchPlaylistVideos(playlistId);
-                    if (videoIds.length > 0) {
-                        socket.emit('load-playlist', { videoIds });
-                        document.getElementById('videoInput').value = '';
-                    } else {
-                        showNotification('❌ Could not load playlist');
-                    }
-                } catch (error) {
-                    showNotification('❌ Error loading playlist');
-                    console.error('Playlist error:', error);
-                }
-                return;
-            }
-
-            // Extract video ID from various YouTube URL formats
             let videoId = input;
+            
             const patterns = [
                 /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/,
                 /youtube\.com\/embed\/([^&\s]+)/,
@@ -1673,73 +1071,45 @@
                 document.getElementById('videoInput').value = '';
                 isPlaying = false;
                 updatePlayButton();
-                showNotification('🎬 Loading new video...');
+                showNotification('📹 Loading new video...', 'info');
                 setTimeout(updateVideoTitle, 1000);
             }
         }
 
-        async function fetchPlaylistVideos(playlistId) {
-            // Try API first if available
-            if (youtubeApiKey) {
-                try {
-                    const response = await fetch(
-                        `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults=50&playlistId=${playlistId}&key=${youtubeApiKey}`
-                    );
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        return data.items.map(item => item.contentDetails.videoId);
-                    }
-                } catch (error) {
-                    console.log('API failed, trying fallback method');
-                }
+        function updateApiKey() {
+            if (userRole !== 'admin') {
+                showNotification('⚠️ Only admins can update API key', 'warning');
+                return;
             }
 
-            // Fallback to scraping method
-            try {
-                const response = await fetch(`https://www.youtube.com/playlist?list=${playlistId}`);
-                const text = await response.text();
-                
-                const videoIdPattern = /"videoId":"([^"]+)"/g;
-                const videoIds = [];
-                const seen = new Set();
-                let match;
-                
-                while ((match = videoIdPattern.exec(text)) !== null) {
-                    const videoId = match[1];
-                    if (!seen.has(videoId) && videoId.length === 11) {
-                        seen.add(videoId);
-                        videoIds.push(videoId);
-                    }
-                }
-                
-                return videoIds.slice(0, 50);
-            } catch (error) {
-                console.error('Error fetching playlist:', error);
-                return [];
+            const apiKey = document.getElementById('updateApiKey').value.trim();
+            
+            if (!apiKey) {
+                showNotification('⚠️ Please enter an API key', 'error');
+                return;
             }
-        }
 
-        function nextVideo() {
-            if (!isAdmin) return;
-            socket.emit('next-video');
-        }
-
-        function previousVideo() {
-            if (!isAdmin) return;
-            socket.emit('previous-video');
+            socket.emit('update-api-key', { apiKey: apiKey });
+            document.getElementById('updateApiKey').value = '';
         }
 
         function requestSync() {
             if (socket) {
                 socket.emit('request-sync');
-                showNotification('🔄 Syncing...');
+                showNotification('🔄 Syncing...', 'info');
             }
         }
 
         function leaveRoom() {
+            if (confirm('Are you sure you want to leave the room?')) {
+                forceLeaveRoom();
+            }
+        }
+
+        function forceLeaveRoom() {
             if (socket) {
                 socket.disconnect();
+                socket = null;
             }
             
             if (player) {
@@ -1747,67 +1117,95 @@
                 player = null;
             }
 
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+
             currentRoom = null;
-            userNickname = null;
-            isAdmin = false;
             isPlaying = false;
+            userRole = 'user';
+            username = '';
             
             document.getElementById('appSection').classList.remove('active');
-            document.getElementById('joinSection').classList.add('active');
-            document.getElementById('roomInput').value = '';
-            document.getElementById('nicknameInput').value = '';
-            document.getElementById('chatMessages').innerHTML = '';
+            document.getElementById('authSection').style.display = 'block';
             
-            showNotification('👋 Left the party');
+            // Clear all input fields
+            document.getElementById('createRoomName').value = '';
+            document.getElementById('createUsername').value = '';
+            document.getElementById('createAdminPassword').value = '';
+            document.getElementById('createJoiningId').value = '';
+            document.getElementById('createDuration').value = '60';
+            document.getElementById('createApiKey').value = '';
+            document.getElementById('joinRoomName').value = '';
+            document.getElementById('joinUsername').value = '';
+            document.getElementById('joinJoiningId').value = '';
+            document.getElementById('joinAdminPassword').value = '';
+            
+            showNotification('👋 Left the party', 'info');
         }
 
-        function showNotification(message) {
+        function showNotification(message, type = 'info') {
             const notification = document.getElementById('notification');
             notification.textContent = message;
-            notification.classList.add('show');
+            notification.className = 'notification show';
+            
+            if (type === 'warning') {
+                notification.classList.add('warning');
+            } else if (type === 'error') {
+                notification.classList.add('error');
+            }
             
             setTimeout(() => {
                 notification.classList.remove('show');
-            }, 3000);
+            }, 4000);
         }
 
-        // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
-            loadApiKey();
+            // Enter key handlers for create tab
+            document.getElementById('createRoomName').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') createRoom();
+            });
+            document.getElementById('createUsername').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') createRoom();
+            });
+            document.getElementById('createAdminPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') createRoom();
+            });
+            document.getElementById('createJoiningId').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') createRoom();
+            });
+            document.getElementById('createDuration').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') createRoom();
+            });
+            document.getElementById('createApiKey').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') createRoom();
+            });
 
-            document.getElementById('roomInput').addEventListener('keypress', (e) => {
+            // Enter key handlers for join tab
+            document.getElementById('joinRoomName').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') joinRoom();
+            });
+            document.getElementById('joinUsername').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') joinRoom();
+            });
+            document.getElementById('joinJoiningId').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') joinRoom();
+            });
+            document.getElementById('joinAdminPassword').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') joinRoom();
             });
 
-            document.getElementById('nicknameInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    document.getElementById('roomInput').focus();
-                }
-            });
-
+            // Enter key handler for video input
             document.getElementById('videoInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') changeVideo();
             });
 
-            document.getElementById('chatInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') sendMessage();
-            });
-
-            document.getElementById('searchQueryInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') performSearch();
-            });
-
-            // Close modals on outside click
-            document.getElementById('settingsModal').addEventListener('click', (e) => {
-                if (e.target.id === 'settingsModal') closeSettings();
-            });
-
-            document.getElementById('searchModal').addEventListener('click', (e) => {
-                if (e.target.id === 'searchModal') closeSearch();
+            // Enter key handler for API key update
+            document.getElementById('updateApiKey').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') updateApiKey();
             });
         });
-
-        document.getElementById('joinSection').classList.add('active');
     </script>
 </body>
 </html>

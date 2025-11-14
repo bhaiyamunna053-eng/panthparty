@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 1280px;
+            max-width: 1800px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -118,7 +118,7 @@
             margin-bottom: 6px;
         }
 
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 12px 16px;
             border: 1px solid #303030;
@@ -128,13 +128,19 @@
             color: #f1f1f1;
             outline: none;
             transition: border-color 0.2s;
+            font-family: inherit;
         }
 
-        input:focus, select:focus {
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input:focus, select:focus, textarea:focus {
             border-color: #ff0000;
         }
 
-        input::placeholder {
+        input::placeholder, textarea::placeholder {
             color: #717171;
         }
 
@@ -197,6 +203,23 @@
 
         .app-section.active {
             display: block;
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        .video-section {
+            min-width: 0;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
         .room-info {
@@ -331,7 +354,7 @@
         }
 
         .control-btn {
-            min-width: 140px;
+            min-width: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -362,40 +385,136 @@
         .api-section {
             padding-top: 16px;
             border-top: 1px solid #303030;
+            margin-top: 16px;
         }
 
-        .info-box {
+        /* Viewers List */
+        .viewers-panel {
             background: #212121;
             border-radius: 12px;
-            padding: 20px 24px;
-            border-left: 4px solid #ff0000;
+            padding: 20px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
         }
 
-        .info-box h3 {
+        .viewers-panel h3 {
             font-size: 16px;
             font-weight: 500;
             margin-bottom: 12px;
             color: #f1f1f1;
         }
 
-        .info-box ul {
-            list-style: none;
-            padding: 0;
+        .viewers-list {
+            flex: 1;
+            overflow-y: auto;
         }
 
-        .info-box li {
-            padding: 6px 0;
-            color: #aaa;
-            font-size: 14px;
+        .viewer-item {
+            padding: 8px 12px;
+            background: #2a2a2a;
+            border-radius: 6px;
+            margin-bottom: 8px;
             display: flex;
-            align-items: flex-start;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .viewer-name {
+            font-size: 14px;
+            color: #f1f1f1;
+        }
+
+        /* Chat Section */
+        .chat-panel {
+            background: #212121;
+            border-radius: 12px;
+            padding: 20px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-panel h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: #f1f1f1;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            padding-right: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #3f3f3f;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #4f4f4f;
+        }
+
+        .chat-message {
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: #2a2a2a;
+            border-radius: 6px;
+            word-wrap: break-word;
+        }
+
+        .chat-message.own {
+            background: #1a3a5a;
+        }
+
+        .chat-username {
+            font-size: 12px;
+            color: #3ea6ff;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .chat-username.admin {
+            color: #ff0000;
+        }
+
+        .chat-text {
+            font-size: 14px;
+            color: #f1f1f1;
+        }
+
+        .chat-time {
+            font-size: 11px;
+            color: #717171;
+            margin-top: 4px;
+        }
+
+        .chat-input-area {
+            display: flex;
             gap: 8px;
         }
 
-        .info-box li:before {
-            content: "▸";
-            color: #ff0000;
-            font-weight: bold;
+        .chat-input-area textarea {
+            flex: 1;
+            min-height: 40px;
+            max-height: 100px;
+            resize: vertical;
+        }
+
+        .chat-input-area button {
+            align-self: flex-end;
         }
 
         .notification {
@@ -443,6 +562,20 @@
             margin-top: 8px;
         }
 
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                order: 2;
+            }
+
+            .video-section {
+                order: 1;
+            }
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 12px;
@@ -476,6 +609,14 @@
 
             .search-section button {
                 width: 100%;
+            }
+
+            .chat-panel {
+                height: 400px;
+            }
+
+            .viewers-panel {
+                height: 250px;
             }
         }
     </style>
@@ -592,51 +733,87 @@
                 <button class="btn-leave" onclick="leaveRoom()">Leave Room</button>
             </div>
 
-            <div class="video-container">
-                <div id="youtube-player"></div>
-            </div>
-
-            <div class="video-info">
-                <h1 class="video-title" id="videoTitle">Loading video...</h1>
-            </div>
-
-            <div class="controls">
-                <div class="control-buttons">
-                    <button class="control-btn play-btn" id="playBtn" onclick="togglePlay()" disabled>
-                        <span id="playIcon">▶</span>
-                        <span id="playText">Play</span>
-                    </button>
-                    <button class="control-btn btn-icon" onclick="requestSync()">
-                        <span>🔄</span>
-                        Sync
-                    </button>
-                </div>
-                <div class="search-section">
-                    <input type="text" id="videoInput" placeholder="Paste YouTube URL or Video ID" />
-                    <button class="btn-secondary" id="loadVideoBtn" onclick="changeVideo()" disabled>
-                        <span>🔍</span>
-                        Load Video
-                    </button>
-                </div>
-                
-                <div class="api-section" id="apiSection" style="display: none;">
-                    <div class="form-group">
-                        <label>Update API Key (Admin Only)</label>
-                        <input type="password" id="updateApiKey" placeholder="Enter new API key" />
-                        <p class="helper-text">Updates PRO mode for all admins</p>
+            <div class="main-content">
+                <!-- Video Section -->
+                <div class="video-section">
+                    <div class="video-container">
+                        <div id="youtube-player"></div>
                     </div>
-                    <button class="btn-secondary" onclick="updateApiKey()">Update API Key</button>
-                </div>
-            </div>
 
-            <div class="info-box">
-                <h3>Room Information</h3>
-                <ul>
-                    <li id="infoRole">Your role: Loading...</li>
-                    <li id="infoControls">Controls: Loading...</li>
-                    <li>Room auto-destroys when: Duration expires or no admin present for 2 minutes</li>
-                    <li>PRO mode enables advanced features for all admins</li>
-                </ul>
+                    <div class="video-info">
+                        <h1 class="video-title" id="videoTitle">Loading video...</h1>
+                    </div>
+
+                    <div class="controls">
+                        <div class="control-buttons">
+                            <button class="control-btn play-btn" id="prevBtn" onclick="previousVideo()" disabled>
+                                <span>⏮️</span>
+                                Previous
+                            </button>
+                            <button class="control-btn play-btn" id="playBtn" onclick="togglePlay()" disabled>
+                                <span id="playIcon">▶</span>
+                                <span id="playText">Play</span>
+                            </button>
+                            <button class="control-btn play-btn" id="nextBtn" onclick="nextVideo()" disabled>
+                                <span>⏭️</span>
+                                Next
+                            </button>
+                            <button class="control-btn btn-icon" onclick="requestSync()">
+                                <span>🔄</span>
+                                Sync
+                            </button>
+                        </div>
+                        
+                        <div class="search-section">
+                            <input type="text" id="videoInput" placeholder="Paste YouTube URL or Video ID or Search" />
+                            <button class="btn-secondary" id="searchBtn" onclick="searchVideo()" disabled>
+                                <span>🔍</span>
+                                Search
+                            </button>
+                            <button class="btn-secondary" id="loadVideoBtn" onclick="changeVideo()" disabled>
+                                <span>▶️</span>
+                                Load
+                            </button>
+                        </div>
+                        
+                        <div class="api-section" id="apiSection" style="display: none;">
+                            <div class="form-group">
+                                <label>Update API Key (Admin Only)</label>
+                                <input type="password" id="updateApiKey" placeholder="Enter new API key" />
+                                <p class="helper-text">Updates PRO mode for all admins</p>
+                            </div>
+                            <button class="btn-secondary" onclick="updateApiKey()">Update API Key</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <!-- Viewers List -->
+                    <div class="viewers-panel">
+                        <h3>👥 Viewers (<span id="viewerCount">0</span>)</h3>
+                        <div class="viewers-list" id="viewersList">
+                            <div class="viewer-item">
+                                <span class="viewer-name">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Panel -->
+                    <div class="chat-panel">
+                        <h3>💬 Chat</h3>
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="chat-message">
+                                <div class="chat-username">System</div>
+                                <div class="chat-text">Welcome to PANTHPARTY! Start chatting with others.</div>
+                            </div>
+                        </div>
+                        <div class="chat-input-area">
+                            <textarea id="chatInput" placeholder="Type a message..." rows="2"></textarea>
+                            <button class="btn-secondary" onclick="sendMessage()">Send</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -653,6 +830,9 @@
         let userRole = 'user';
         let username = '';
         let timerInterval = null;
+        let playlist = [];
+        let currentVideoIndex = 0;
+        let viewersData = new Map();
 
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
@@ -676,7 +856,7 @@
             }
         }
 
-        function initPlayer(videoId = 'uzwgt8uGt90') {
+        function initPlayer(videoId = 'dQw4w9WgXcQ') {
             if (player) {
                 player.destroy();
             }
@@ -804,16 +984,30 @@
 
             socket.on('user-joined', (data) => {
                 updateUserCount(data);
-                showNotification(`${data.username} joined as ${data.role}`, 'info');
+                addViewerToList(data.socketId, data.username, data.role);
+                addChatMessage('System', `${data.username} joined as ${data.role}`, false, true);
             });
 
             socket.on('user-left', (data) => {
                 updateUserCount(data);
-                showNotification(`${data.username} left the room`, 'info');
+                removeViewerFromList(data.socketId);
+                addChatMessage('System', `${data.username} left the room`, false, true);
                 
                 if (data.noAdminWarning) {
                     showNotification('⚠️ No admin in room! Room will be destroyed in 2 minutes', 'warning');
                 }
+            });
+
+            socket.on('viewers-list', (data) => {
+                viewersData.clear();
+                data.viewers.forEach(viewer => {
+                    viewersData.set(viewer.socketId, viewer);
+                });
+                updateViewersList();
+            });
+
+            socket.on('chat-message', (data) => {
+                addChatMessage(data.username, data.message, false, false, data.role);
             });
 
             socket.on('play', (data) => {
@@ -844,7 +1038,7 @@
                     player.loadVideoById(data.videoId);
                     isPlaying = false;
                     updatePlayButton();
-                    showNotification(`📹 ${data.from} changed the video`, 'info');
+                    addChatMessage('System', `${data.from} changed the video`, false, true);
                     setTimeout(() => { 
                         isSyncing = false;
                         updateVideoTitle();
@@ -957,33 +1151,37 @@
             updateTimer(data.remainingTime);
             startTimerUpdates();
 
-            updateRoleInfo();
+            // Add self to viewers list
+            viewersData.set(socket.id, { socketId: socket.id, username: username, role: userRole });
+            updateViewersList();
+
+            // Request full viewers list
+            socket.emit('request-viewers');
+
+            addChatMessage('System', `Welcome to ${data.roomName}!`, true, true);
             showNotification(`✅ Joined room as ${data.role}`, 'info');
         }
 
         function updateUserCount(data) {
             const totalUsers = (data.adminCount || 0) + (data.userCount || 0);
             document.getElementById('userCount').textContent = totalUsers;
+            document.getElementById('viewerCount').textContent = totalUsers;
         }
 
         function enableAdminControls() {
             document.getElementById('playBtn').disabled = false;
             document.getElementById('loadVideoBtn').disabled = false;
+            document.getElementById('searchBtn').disabled = false;
+            document.getElementById('prevBtn').disabled = false;
+            document.getElementById('nextBtn').disabled = false;
         }
 
         function disableAdminControls() {
             document.getElementById('playBtn').disabled = true;
             document.getElementById('loadVideoBtn').disabled = true;
-        }
-
-        function updateRoleInfo() {
-            if (userRole === 'admin') {
-                document.getElementById('infoRole').textContent = 'Your role: Admin (can control playback)';
-                document.getElementById('infoControls').textContent = 'Controls: Full access to play, pause, seek, and change videos';
-            } else {
-                document.getElementById('infoRole').textContent = 'Your role: Viewer (watch only)';
-                document.getElementById('infoControls').textContent = 'Controls: Watch only - admins control playback';
-            }
+            document.getElementById('searchBtn').disabled = true;
+            document.getElementById('prevBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = true;
         }
 
         function updateTimer(seconds) {
@@ -1049,6 +1247,20 @@
                 return;
             }
 
+            let videoId = extractVideoId(input);
+
+            if (player && player.loadVideoById) {
+                player.loadVideoById(videoId);
+                socket.emit('video-change', { videoId: videoId });
+                document.getElementById('videoInput').value = '';
+                isPlaying = false;
+                updatePlayButton();
+                showNotification('📹 Loading new video...', 'info');
+                setTimeout(updateVideoTitle, 1000);
+            }
+        }
+
+        function extractVideoId(input) {
             let videoId = input;
             
             const patterns = [
@@ -1065,13 +1277,70 @@
                 }
             }
 
+            return videoId;
+        }
+
+        function searchVideo() {
+            if (userRole !== 'admin') {
+                showNotification('⚠️ Only admins can search videos', 'warning');
+                return;
+            }
+
+            const query = document.getElementById('videoInput').value.trim();
+            
+            if (!query) {
+                showNotification('⚠️ Please enter a search query', 'error');
+                return;
+            }
+
+            // Open YouTube search in new tab
+            const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+            window.open(searchUrl, '_blank');
+            showNotification('🔍 Opening YouTube search...', 'info');
+        }
+
+        function previousVideo() {
+            if (userRole !== 'admin') {
+                showNotification('⚠️ Only admins can control playback', 'warning');
+                return;
+            }
+
+            if (playlist.length === 0) {
+                showNotification('⚠️ No playlist available', 'warning');
+                return;
+            }
+
+            currentVideoIndex = (currentVideoIndex - 1 + playlist.length) % playlist.length;
+            const videoId = playlist[currentVideoIndex];
+            
             if (player && player.loadVideoById) {
                 player.loadVideoById(videoId);
                 socket.emit('video-change', { videoId: videoId });
-                document.getElementById('videoInput').value = '';
                 isPlaying = false;
                 updatePlayButton();
-                showNotification('📹 Loading new video...', 'info');
+                setTimeout(updateVideoTitle, 1000);
+            }
+        }
+
+        function nextVideo() {
+            if (userRole !== 'admin') {
+                showNotification('⚠️ Only admins can control playback', 'warning');
+                return;
+            }
+
+            if (playlist.length === 0) {
+                showNotification('⚠️ No playlist available', 'warning');
+                return;
+            }
+
+            currentVideoIndex = (currentVideoIndex + 1) % playlist.length;
+            const videoId = playlist[currentVideoIndex];
+            
+            if (player && player.loadVideoById) {
+                player.loadVideoById(videoId);
+                socket.emit('video-change', { videoId: videoId });
+                isPlaying = false;
+                updatePlayButton();
                 setTimeout(updateVideoTitle, 1000);
             }
         }
@@ -1100,6 +1369,85 @@
             }
         }
 
+        // Viewers List Functions
+        function addViewerToList(socketId, username, role) {
+            viewersData.set(socketId, { socketId, username, role });
+            updateViewersList();
+        }
+
+        function removeViewerFromList(socketId) {
+            viewersData.delete(socketId);
+            updateViewersList();
+        }
+
+        function updateViewersList() {
+            const viewersList = document.getElementById('viewersList');
+            viewersList.innerHTML = '';
+
+            if (viewersData.size === 0) {
+                viewersList.innerHTML = '<div class="viewer-item"><span class="viewer-name">No viewers yet</span></div>';
+                return;
+            }
+
+            viewersData.forEach(viewer => {
+                const viewerItem = document.createElement('div');
+                viewerItem.className = 'viewer-item';
+                
+                const badge = viewer.role === 'admin' 
+                    ? '<span class="admin-badge">ADMIN</span>' 
+                    : '<span class="user-badge">VIEWER</span>';
+                
+                viewerItem.innerHTML = `
+                    <span class="viewer-name">${viewer.username}</span>
+                    ${badge}
+                `;
+                
+                viewersList.appendChild(viewerItem);
+            });
+        }
+
+        // Chat Functions
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            if (socket && socket.connected) {
+                socket.emit('chat-message', { message: message });
+                addChatMessage(username, message, true, false, userRole);
+                input.value = '';
+            }
+        }
+
+        function addChatMessage(user, text, isOwn = false, isSystem = false, role = 'user') {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message' + (isOwn ? ' own' : '');
+
+            const time = new Date().toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+
+            const usernameClass = isSystem ? '' : (role === 'admin' ? ' admin' : '');
+
+            messageDiv.innerHTML = `
+                <div class="chat-username${usernameClass}">${user}</div>
+                <div class="chat-text">${escapeHtml(text)}</div>
+                <div class="chat-time">${time}</div>
+            `;
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function leaveRoom() {
             if (confirm('Are you sure you want to leave the room?')) {
                 forceLeaveRoom();
@@ -1126,6 +1474,7 @@
             isPlaying = false;
             userRole = 'user';
             username = '';
+            viewersData.clear();
             
             document.getElementById('appSection').classList.remove('active');
             document.getElementById('authSection').style.display = 'block';
@@ -1163,37 +1512,17 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             // Enter key handlers for create tab
-            document.getElementById('createRoomName').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') createRoom();
-            });
-            document.getElementById('createUsername').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') createRoom();
-            });
-            document.getElementById('createAdminPassword').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') createRoom();
-            });
-            document.getElementById('createJoiningId').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') createRoom();
-            });
-            document.getElementById('createDuration').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') createRoom();
-            });
-            document.getElementById('createApiKey').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') createRoom();
+            ['createRoomName', 'createUsername', 'createAdminPassword', 'createJoiningId', 'createDuration', 'createApiKey'].forEach(id => {
+                document.getElementById(id).addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') createRoom();
+                });
             });
 
             // Enter key handlers for join tab
-            document.getElementById('joinRoomName').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') joinRoom();
-            });
-            document.getElementById('joinUsername').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') joinRoom();
-            });
-            document.getElementById('joinJoiningId').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') joinRoom();
-            });
-            document.getElementById('joinAdminPassword').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') joinRoom();
+            ['joinRoomName', 'joinUsername', 'joinJoiningId', 'joinAdminPassword'].forEach(id => {
+                document.getElementById(id).addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') joinRoom();
+                });
             });
 
             // Enter key handler for video input
@@ -1204,6 +1533,14 @@
             // Enter key handler for API key update
             document.getElementById('updateApiKey').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') updateApiKey();
+            });
+
+            // Enter key handler for chat
+            document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
             });
         });
     </script>

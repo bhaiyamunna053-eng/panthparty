@@ -186,9 +186,9 @@ io.on('connection', (socket) => {
     // Add creator as admin
     socket.join(roomId);
     socket.roomId = roomId;
+    socket.username = username;
     const userInfo = room.addAdmin(socket.id, username);
     socket.userRole = 'admin';
-    socket.username = username;
     
     // Send room created confirmation
     socket.emit('room-created', {
@@ -198,6 +198,10 @@ io.on('connection', (socket) => {
       username: username,
       ...room.getState()
     });
+
+    // Send initial viewers list
+    const viewers = getAllViewersInRoom(room);
+    socket.emit('viewers-list', { viewers: viewers });
     
     console.log(`Room ${roomId} created by ${username}`);
   });

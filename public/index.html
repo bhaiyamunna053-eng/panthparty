@@ -979,7 +979,6 @@
         let timerInterval = null;
         let playlist = [];
         let currentVideoIndex = 0;
-        let viewersData = new Map();
 
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
@@ -1228,7 +1227,6 @@
                     player.loadVideoById(data.videoId);
                     isPlaying = false;
                     updatePlayButton();
-                    addChatMessage('System', `${data.from} changed the video`, false, true);
                     setTimeout(() => { 
                         isSyncing = false;
                         updateVideoTitle();
@@ -1801,7 +1799,6 @@
             isPlaying = false;
             userRole = 'user';
             username = '';
-            viewersData.clear();
             
             // Clear API key from session
             sessionStorage.removeItem('youtube_api_key');
@@ -1820,6 +1817,9 @@
             document.getElementById('joinUsername').value = '';
             document.getElementById('joinJoiningId').value = '';
             document.getElementById('joinAdminPassword').value = '';
+            
+            // Clear chat
+            document.getElementById('chatMessages').innerHTML = '';
             
             showNotification('👋 Left the party', 'info');
         }
@@ -1889,30 +1889,6 @@
                     sendMessage();
                 }
             });
-
-            // Add manual test function for debugging
-            window.testChat = function() {
-                console.log('=== MANUAL CHAT TEST ===');
-                console.log('Chat container exists?', !!document.getElementById('chatMessages'));
-                console.log('Viewers list exists?', !!document.getElementById('viewersList'));
-                console.log('Current viewers data:', Array.from(viewersData.values()));
-                console.log('Socket connected?', socket && socket.connected);
-                console.log('Current room:', currentRoom);
-                console.log('Username:', username);
-                console.log('User role:', userRole);
-                
-                // Try adding a test message
-                addChatMessage('Test User', 'This is a test message', false, false, 'user');
-                console.log('Test message added. Check chat panel.');
-                
-                // Check chat container children
-                const chatContainer = document.getElementById('chatMessages');
-                console.log('Chat container children count:', chatContainer ? chatContainer.children.length : 0);
-                
-                return 'Test complete. Check console and chat panel.';
-            };
-            
-            console.log('💡 Type window.testChat() in console to test chat manually');
         });
     </script>
 </body>

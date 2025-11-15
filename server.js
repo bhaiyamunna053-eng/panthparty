@@ -262,9 +262,20 @@ io.on('connection', (socket) => {
       userCount: targetRoom.normalUsers.size,
       totalUsers: targetRoom.admins.size + targetRoom.normalUsers.size
     });
-    
+    io.to(targetRoomId).emit('viewers-list', {
+        viewers: getAllViewersInRoom(targetRoom)
+    });
     console.log(`${username} joined room ${targetRoomId} as ${userInfo.role}`);
   });
+
+  // Send full viewers list when requested
+  socket.on('request-viewers', () => {
+    const room = rooms.get(socket.roomId);
+    if (!room) return;
+
+    const viewers = getAllViewersInRoom(room);
+    socket.emit('viewers-list', { viewers });
+});
 
   // Play event (admin only)
   socket.on('play', (data) => {
@@ -384,11 +395,32 @@ io.on('connection', (socket) => {
           totalUsers: result.totalUsers,
           noAdminWarning: result.wasAdmin && result.remainingAdmins === 0
         });
+
+        io.to(socket.roomId).emit('viewers-list', {
+          viewers: getAllViewersInRoom(room)
+        });
+
         
         console.log(`${socket.username} left room ${socket.roomId}`);
       }
     }
   });
+
+  // Chat messages
+  socket.on('chat-message', (data) => {
+    const room = rooms.get(socket.roomId);
+    if (!room) return;
+
+    // Broadcast to the room, including the sender
+    io.to(socket.roomId).emit('chat-message', {
+        socketId: socket.id,
+        username: socket.username,
+        role: socket.userRole,
+        message: data.message,   // match the client's expected field name
+        timestamp: Date.now()
+    });
+});
+
 
   // Handle errors
   socket.on('error', (error) => {
@@ -483,3 +515,4 @@ process.on('SIGTERM', () => {
 });
 
 module.exports = { app, io };
+

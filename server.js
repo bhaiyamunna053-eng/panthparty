@@ -1,4 +1,4 @@
-// server.js - PANTHPARTY Backend Server with Advanced Room Management
+// server.js - PANTHPARTY Backend Server with Advanced Room Management V16
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
@@ -202,6 +202,12 @@ io.on('connection', (socket) => {
     // Send initial viewers list
     const viewers = getAllViewersInRoom(room);
     socket.emit('viewers-list', { viewers: viewers });
+
+    // Broadcast to room that creator is here (after short delay)
+    setTimeout(() => {
+      const updatedViewers = getAllViewersInRoom(room);
+      io.to(roomId).emit('viewers-list', { viewers: updatedViewers });
+    }, 200);
     
     console.log(`Room ${roomId} created by ${username}`);
   });
@@ -404,30 +410,35 @@ io.on('connection', (socket) => {
 function getAllViewersInRoom(room) {
   const viewers = [];
   
+  console.log(`Getting viewers for room. Admins: ${room.admins.size}, Users: ${room.normalUsers.size}`);
+  
   // Add all admins
   room.admins.forEach(socketId => {
     const adminSocket = io.sockets.sockets.get(socketId);
-    if (adminSocket) {
+    if (adminSocket && adminSocket.username) {
       viewers.push({
         socketId: socketId,
         username: adminSocket.username,
         role: 'admin'
       });
+      console.log('Added admin to viewers:', adminSocket.username);
     }
   });
   
   // Add all normal users
   room.normalUsers.forEach(socketId => {
     const userSocket = io.sockets.sockets.get(socketId);
-    if (userSocket) {
+    if (userSocket && userSocket.username) {
       viewers.push({
         socketId: socketId,
         username: userSocket.username,
         role: 'user'
       });
+      console.log('Added user to viewers:', userSocket.username);
     }
   });
   
+  console.log(`Total viewers to send: ${viewers.length}`);
   return viewers;
 }
 

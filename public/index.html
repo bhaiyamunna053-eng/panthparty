@@ -472,41 +472,52 @@
         }
 
         .chat-message {
-            margin-bottom: 8px;
-            padding: 10px 14px;
-            background: #2a2a2a;
-            border-radius: 8px;
-            word-wrap: break-word;
+            margin-bottom: 12px;
+            animation: messageIn 0.2s ease;
         }
 
-        .chat-message.own {
-            background: #1a3a5a;
+        @keyframes messageIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .chat-message.system {
-            background: #3a2a1a;
+            text-align: center;
+            color: #717171;
+            font-size: 13px;
             font-style: italic;
         }
 
-        .chat-username {
-            font-size: 13px;
-            color: #3ea6ff;
-            font-weight: 600;
+        .chat-message.user .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             margin-bottom: 4px;
         }
 
-        .chat-username.admin {
+        .chat-message.user .message-author {
+            font-size: 13px;
+            font-weight: 600;
+            color: #3ea6ff;
+        }
+
+        .chat-message.user .message-author.admin {
             color: #ff0000;
         }
 
-        .chat-username.system {
-            color: #ffa500;
-        }
-
-        .chat-text {
+        .chat-message.user .message-text {
             font-size: 14px;
             color: #f1f1f1;
-            line-height: 1.4;
+            background: #121212;
+            padding: 8px 12px;
+            border-radius: 8px;
+            word-wrap: break-word;
         }
 
         .chat-input-area {
@@ -1338,34 +1349,15 @@
             updateTimer(data.remainingTime);
             startTimerUpdates();
 
-            // Don't add self to viewers list here - wait for server's viewers-list event
-            // Clear existing chat messages
-            const chatContainer = document.getElementById('chatMessages');
-            if (chatContainer) {
-                chatContainer.innerHTML = '';
-                console.log('Chat container cleared');
-            }
-            
-            // Add welcome message
-            setTimeout(() => {
-                addChatMessage('System', `Welcome to ${data.roomName}! You joined as ${userRole}.`, false, true);
-                console.log('Welcome message should be visible now');
-            }, 100);
-            
             showNotification(`✅ Joined room as ${data.role}`, 'info');
-
-            console.log('Waiting for viewers list from server...');
+            console.log('Room entry complete');
         }
 
         function updateUserCount(data) {
-            const totalUsers = (data.adminCount || 0) + (data.userCount || 0);
+            const totalUsers = data.users ? data.users.length : 0;
             document.getElementById('userCount').textContent = totalUsers;
             document.getElementById('viewerCount').textContent = totalUsers;
-            console.log('User count updated:', {
-                admins: data.adminCount,
-                viewers: data.userCount,
-                total: totalUsers
-            });
+            console.log('User count updated:', totalUsers);
         }
 
         function enableAdminControls() {

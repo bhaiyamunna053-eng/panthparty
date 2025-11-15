@@ -1095,7 +1095,7 @@
             socket = io(SERVER_URL);
 
             socket.on('connect', () => {
-                console.log('Connected to server');
+                console.log('✅ Connected to server - Socket ID:', socket.id);
             });
 
             socket.on('room-created', (data) => {
@@ -1118,6 +1118,7 @@
                 updateUserCount(data);
                 addViewerToList(data.socketId, data.username, data.role);
                 addChatMessage('System', `${data.username} joined as ${data.role}`, false, true);
+                showNotification(`${data.username} joined`, 'info');
             });
 
             socket.on('user-left', (data) => {
@@ -1131,6 +1132,7 @@
             });
 
             socket.on('viewers-list', (data) => {
+                console.log('Received viewers list:', data.viewers);
                 viewersData.clear();
                 data.viewers.forEach(viewer => {
                     viewersData.set(viewer.socketId, viewer);
@@ -1150,6 +1152,7 @@
                 // Check if message is from self
                 const isOwn = data.socketId === socket.id;
                 addChatMessage(data.username, data.message, isOwn, false, data.role);
+                console.log('Chat message received:', data);
             });
 
             socket.on('play', (data) => {
@@ -1301,21 +1304,33 @@
             updateTimer(data.remainingTime);
             startTimerUpdates();
 
-            // Add self to viewers list
+            // Add self to viewers list immediately
             viewersData.set(socket.id, { socketId: socket.id, username: username, role: userRole });
             updateViewersList();
 
-            // Request full viewers list
-            socket.emit('request-viewers');
-
-            addChatMessage('System', `Welcome to ${data.roomName}!`, true, true);
+            // Clear chat and add welcome message
+            document.getElementById('chatMessages').innerHTML = '';
+            addChatMessage('System', `Welcome to ${data.roomName}! You joined as ${userRole}.`, false, true);
+            
             showNotification(`✅ Joined room as ${data.role}`, 'info');
+
+            // Request viewers list after a short delay to ensure server is ready
+            setTimeout(() => {
+                if (socket && socket.connected) {
+                    socket.emit('request-viewers');
+                }
+            }, 500);
         }
 
         function updateUserCount(data) {
             const totalUsers = (data.adminCount || 0) + (data.userCount || 0);
             document.getElementById('userCount').textContent = totalUsers;
             document.getElementById('viewerCount').textContent = totalUsers;
+            console.log('User count updated:', {
+                admins: data.adminCount,
+                viewers: data.userCount,
+                total: totalUsers
+            });
         }
 
         function enableAdminControls() {
@@ -1644,17 +1659,22 @@
 
         // Viewers List Functions
         function addViewerToList(socketId, username, role) {
+            if (!socketId || !username) return;
             viewersData.set(socketId, { socketId, username, role });
             updateViewersList();
         }
 
         function removeViewerFromList(socketId) {
+            if (!socketId) return;
             viewersData.delete(socketId);
             updateViewersList();
         }
 
         function updateViewersList() {
             const viewersList = document.getElementById('viewersList');
+            
+            if (!viewersList) return;
+
             viewersList.innerHTML = '';
 
             if (viewersData.size === 0) {
@@ -1662,21 +1682,32 @@
                 return;
             }
 
-            viewersData.forEach(viewer => {
+            // Convert to array and sort (admins first)
+            const viewersArray = Array.from(viewersData.values());
+            viewersArray.sort((a, b) => {
+                if (a.role === 'admin' && b.role !== 'admin') return -1;
+                if (a.role !== 'admin' && b.role === 'admin') return 1;
+                return a.username.localeCompare(b.username);
+            });
+
+            viewersArray.forEach(viewer => {
                 const viewerItem = document.createElement('div');
                 viewerItem.className = 'viewer-item';
+                viewerItem.setAttribute('data-socket-id', viewer.socketId);
                 
                 const badge = viewer.role === 'admin' 
                     ? '<span class="admin-badge">ADMIN</span>' 
                     : '<span class="user-badge">VIEWER</span>';
                 
                 viewerItem.innerHTML = `
-                    <span class="viewer-name">${viewer.username}</span>
+                    <span class="viewer-name">${escapeHtml(viewer.username)}</span>
                     ${badge}
                 `;
                 
                 viewersList.appendChild(viewerItem);
             });
+
+            console.log('Updated viewers list:', viewersData.size, 'viewers');
         }
 
         // Chat Functions
@@ -1689,11 +1720,20 @@
             if (socket && socket.connected) {
                 socket.emit('chat-message', { message: message });
                 input.value = '';
+                
+                // Scroll to bottom
+                const chatMessages = document.getElementById('chatMessages');
+                setTimeout(() => {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 100);
             }
         }
 
         function addChatMessage(user, text, isOwn = false, isSystem = false, role = 'user') {
             const chatMessages = document.getElementById('chatMessages');
+            
+            if (!chatMessages) return;
+
             const messageDiv = document.createElement('div');
             messageDiv.className = 'chat-message' + (isOwn ? ' own' : '') + (isSystem ? ' system' : '');
 
@@ -1705,7 +1745,16 @@
             `;
 
             chatMessages.appendChild(messageDiv);
+            
+            // Auto scroll to bottom
             chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Limit chat messages to last 100
+            while (chatMessages.children.length > 100) {
+                chatMessages.removeChild(chatMessages.firstChild);
+            }
+
+            console.log('Chat message added:', user, text);
         }
 
         function escapeHtml(text) {

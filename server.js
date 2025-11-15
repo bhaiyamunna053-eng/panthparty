@@ -213,15 +213,15 @@ io.on('connection', (socket) => {
       ...room.getState()
     });
 
-    // Send initial viewers list
-    const viewers = getAllViewersInRoom(room);
-    socket.emit('viewers-list', { viewers: viewers });
+    // Send empty chat history (room just created)
+    socket.emit('chat-history', []);
 
-    // Broadcast to room that creator is here (after short delay)
-    setTimeout(() => {
-      const updatedViewers = getAllViewersInRoom(room);
-      io.to(roomId).emit('viewers-list', { viewers: updatedViewers });
-    }, 200);
+    // Send initial user list
+    const userListData = {
+      users: room.users,
+      admin: socket.id
+    };
+    socket.emit('user-list-update', userListData);
     
     console.log(`Room ${roomId} created by ${username}`);
   });

@@ -396,6 +396,37 @@ io.on('connection', (socket) => {
   });
 });
 
+// Helper function to get all viewers in a room
+function getAllViewersInRoom(room) {
+  const viewers = [];
+  
+  // Add all admins
+  room.admins.forEach(socketId => {
+    const adminSocket = io.sockets.sockets.get(socketId);
+    if (adminSocket) {
+      viewers.push({
+        socketId: socketId,
+        username: adminSocket.username,
+        role: 'admin'
+      });
+    }
+  });
+  
+  // Add all normal users
+  room.normalUsers.forEach(socketId => {
+    const userSocket = io.sockets.sockets.get(socketId);
+    if (userSocket) {
+      viewers.push({
+        socketId: socketId,
+        username: userSocket.username,
+        role: 'user'
+      });
+    }
+  });
+  
+  return viewers;
+}
+
 // Periodic cleanup of expired rooms
 setInterval(() => {
   const now = Date.now();

@@ -1290,6 +1290,21 @@
                 showNotification('❌ Connection error! Make sure server is running.', 'error');
                 console.error('Connection error:', error);
             });
+
+            socket.on("chatMessage", (msg) => {
+                const chatMessages = document.getElementById("chatMessages");
+                const newMessage = document.createElement("div");
+                newMessage.classList.add("chat-message", "user");
+                newMessage.innerHTML = `
+                    <div class="message-header">
+                        <span class="message-author">${msg.user}</span>
+                    </div>
+                    <div class="message-text">${msg.text}</div>
+                `;
+                chatMessages.appendChild(newMessage);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+
         }
 
         function handleRoomEntry(data) {
@@ -1839,6 +1854,26 @@
                 notification.classList.remove('show');
             }, 4000);
         }
+
+        function sendMessage() {
+            const input = document.getElementById("chatInput");
+            const message = input.value.trim();
+
+            if (message === "") return; // don’t send empty messages
+
+            // Emit to server
+            if (socket && currentRoom) {
+                 socket.emit("chatMessage", {
+                     room: currentRoom,
+                     user: username,
+                     text: message
+            });
+            }
+
+             // Clear input
+            input.value = "";
+        }
+
 
         document.addEventListener('DOMContentLoaded', () => {
             // Enter key handlers for create tab

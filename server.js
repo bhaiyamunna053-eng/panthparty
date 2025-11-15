@@ -1,4 +1,4 @@
-// server.js - PANTHPARTY Backend Server with Advanced Room Management V16
+// server.js - PANTHPARTY Backend Server with Advanced Room Management
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
@@ -27,18 +27,19 @@ class Room {
     this.joiningId = joiningId;
     this.admins = new Set();
     this.normalUsers = new Set();
-    this.currentVideo = 'uzwgt8uGt90';
+    this.users = []; // Array to store user details with nicknames
+    this.chatHistory = []; // Store chat messages
+    this.currentVideo = 'dQw4w9WgXcQ';
     this.isPlaying = false;
     this.currentTime = 0;
     this.lastUpdate = Date.now();
     this.createdAt = Date.now();
-    this.duration = duration; // in minutes
+    this.duration = duration;
     this.expiresAt = Date.now() + (duration * 60 * 1000);
     this.apiKey = apiKey;
     this.autoDestroyTimer = null;
     this.roomDestructionTimer = null;
     
-    // Set room destruction timer
     if (duration > 0) {
       this.roomDestructionTimer = setTimeout(() => {
         this.destroyRoom('duration_expired');
@@ -48,27 +49,36 @@ class Room {
 
   addAdmin(socketId, username) {
     this.admins.add(socketId);
+    // Add or update user in array
+    const existingIndex = this.users.findIndex(u => u.socketId === socketId);
+    if (existingIndex >= 0) {
+      this.users[existingIndex] = { socketId, nickname: username, isAdmin: true };
+    } else {
+      this.users.push({ socketId, nickname: username, isAdmin: true });
+    }
     this.cancelAutoDestroy();
-    return {
-      role: 'admin',
-      username: username
-    };
+    return { role: 'admin', username: username };
   }
 
   addNormalUser(socketId, username) {
     this.normalUsers.add(socketId);
-    return {
-      role: 'user',
-      username: username
-    };
+    // Add or update user in array
+    const existingIndex = this.users.findIndex(u => u.socketId === socketId);
+    if (existingIndex >= 0) {
+      this.users[existingIndex] = { socketId, nickname: username, isAdmin: false };
+    } else {
+      this.users.push({ socketId, nickname: username, isAdmin: false });
+    }
+    return { role: 'user', username: username };
   }
 
   removeUser(socketId) {
     const wasAdmin = this.admins.has(socketId);
     this.admins.delete(socketId);
     this.normalUsers.delete(socketId);
+    // Remove from users array
+    this.users = this.users.filter(u => u.socketId !== socketId);
     
-    // If last admin left, start auto-destroy timer
     if (wasAdmin && this.admins.size === 0) {
       this.startAutoDestroy();
     }
@@ -80,8 +90,15 @@ class Room {
     };
   }
 
+  addChatMessage(message) {
+    this.chatHistory.push(message);
+    // Keep only last 100 messages
+    if (this.chatHistory.length > 100) {
+      this.chatHistory.shift();
+    }
+  }
+
   startAutoDestroy() {
-    // If no admins in room, destroy after 2 minutes
     if (this.autoDestroyTimer) {
       clearTimeout(this.autoDestroyTimer);
     }
@@ -104,7 +121,6 @@ class Room {
   destroyRoom(reason) {
     console.log(`Room ${this.roomId}: Destroying room. Reason: ${reason}`);
     
-    // Clear all timers
     if (this.autoDestroyTimer) {
       clearTimeout(this.autoDestroyTimer);
     }
@@ -112,7 +128,6 @@ class Room {
       clearTimeout(this.roomDestructionTimer);
     }
     
-    // Notify all users
     const allUsers = [...this.admins, ...this.normalUsers];
     allUsers.forEach(socketId => {
       io.to(socketId).emit('room-destroyed', {
@@ -123,7 +138,6 @@ class Room {
       });
     });
     
-    // Remove from rooms map
     rooms.delete(this.roomId);
   }
 
@@ -137,7 +151,7 @@ class Room {
 
   getRemainingTime() {
     const remaining = this.expiresAt - Date.now();
-    return Math.max(0, Math.floor(remaining / 1000)); // in seconds
+    return Math.max(0, Math.floor(remaining / 1000));
   }
 
   updateState(isPlaying, currentTime) {

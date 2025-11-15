@@ -1115,10 +1115,15 @@
             });
 
             socket.on('user-joined', (data) => {
+                console.log('User joined event:', data);
                 updateUserCount(data);
-                addViewerToList(data.socketId, data.username, data.role);
-                addChatMessage('System', `${data.username} joined as ${data.role}`, false, true);
-                showNotification(`${data.username} joined`, 'info');
+                
+                // Only add to viewers list if it's not yourself
+                if (data.socketId !== socket.id) {
+                    addViewerToList(data.socketId, data.username, data.role);
+                    addChatMessage('System', `${data.username} joined as ${data.role}`, false, true);
+                    showNotification(`${data.username} joined`, 'info');
+                }
             });
 
             socket.on('user-left', (data) => {
@@ -1133,11 +1138,24 @@
 
             socket.on('viewers-list', (data) => {
                 console.log('Received viewers list:', data.viewers);
+                
+                // Clear and rebuild entire list
                 viewersData.clear();
-                data.viewers.forEach(viewer => {
-                    viewersData.set(viewer.socketId, viewer);
-                });
+                
+                if (data.viewers && Array.isArray(data.viewers)) {
+                    data.viewers.forEach(viewer => {
+                        if (viewer.socketId && viewer.username) {
+                            viewersData.set(viewer.socketId, {
+                                socketId: viewer.socketId,
+                                username: viewer.username,
+                                role: viewer.role
+                            });
+                        }
+                    });
+                }
+                
                 updateViewersList();
+                console.log('Viewers data now has:', viewersData.size, 'entries');
             });
 
             socket.on('viewers-list', (data) => {
@@ -1149,10 +1167,18 @@
             });
 
             socket.on('chat-message', (data) => {
+                console.log('Chat message received from server:', data);
+                
+                if (!data.username || !data.message) {
+                    console.error('Invalid chat message data:', data);
+                    return;
+                }
+                
                 // Check if message is from self
                 const isOwn = data.socketId === socket.id;
-                addChatMessage(data.username, data.message, isOwn, false, data.role);
-                console.log('Chat message received:', data);
+                console.log('Is own message?', isOwn, 'My socket:', socket.id, 'Message socket:', data.socketId);
+                
+                addChatMessage(data.username, data.message, isOwn, false, data.role || 'user');
             });
 
             socket.on('play', (data) => {
@@ -1304,22 +1330,14 @@
             updateTimer(data.remainingTime);
             startTimerUpdates();
 
-            // Add self to viewers list immediately
-            viewersData.set(socket.id, { socketId: socket.id, username: username, role: userRole });
-            updateViewersList();
-
+            // Don't add self to viewers list here - wait for server's viewers-list event
             // Clear chat and add welcome message
             document.getElementById('chatMessages').innerHTML = '';
             addChatMessage('System', `Welcome to ${data.roomName}! You joined as ${userRole}.`, false, true);
             
             showNotification(`✅ Joined room as ${data.role}`, 'info');
 
-            // Request viewers list after a short delay to ensure server is ready
-            setTimeout(() => {
-                if (socket && socket.connected) {
-                    socket.emit('request-viewers');
-                }
-            }, 500);
+            console.log('Waiting for viewers list from server...');
         }
 
         function updateUserCount(data) {
@@ -1715,32 +1733,41 @@
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
 
-            if (!message) return;
+            if (!message) {
+                console.log('Empty message, not sending');
+                return;
+            }
 
             if (socket && socket.connected) {
+                console.log('Sending chat message:', message);
                 socket.emit('chat-message', { message: message });
                 input.value = '';
-                
-                // Scroll to bottom
-                const chatMessages = document.getElementById('chatMessages');
-                setTimeout(() => {
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }, 100);
+            } else {
+                console.error('Socket not connected!');
+                showNotification('❌ Not connected to server', 'error');
             }
         }
 
         function addChatMessage(user, text, isOwn = false, isSystem = false, role = 'user') {
             const chatMessages = document.getElementById('chatMessages');
             
-            if (!chatMessages) return;
+            if (!chatMessages) {
+                console.error('Chat messages element not found!');
+                return;
+            }
+
+            console.log('Adding chat message:', { user, text, isOwn, isSystem, role });
 
             const messageDiv = document.createElement('div');
-            messageDiv.className = 'chat-message' + (isOwn ? ' own' : '') + (isSystem ? ' system' : '');
+            messageDiv.className = 'chat-message';
+            
+            if (isOwn) messageDiv.classList.add('own');
+            if (isSystem) messageDiv.classList.add('system');
 
-            const usernameClass = isSystem ? ' system' : (role === 'admin' ? ' admin' : '');
+            const usernameClass = isSystem ? 'system' : (role === 'admin' ? 'admin' : '');
 
             messageDiv.innerHTML = `
-                <div class="chat-username${usernameClass}">${escapeHtml(user)}</div>
+                <div class="chat-username ${usernameClass}">${escapeHtml(user)}</div>
                 <div class="chat-text">${escapeHtml(text)}</div>
             `;
 
@@ -1754,7 +1781,7 @@
                 chatMessages.removeChild(chatMessages.firstChild);
             }
 
-            console.log('Chat message added:', user, text);
+            console.log('Chat message added successfully. Total messages:', chatMessages.children.length);
         }
 
         function escapeHtml(text) {

@@ -446,11 +446,7 @@
             flex: 1;
             overflow-y: auto;
             margin-bottom: 12px;
-            padding: 8px;
-            min-height: 200px;
-            max-height: 400px;
-            background: #1a1a1a;
-            border-radius: 8px;
+            padding-right: 8px;
         }
 
         .chat-messages::-webkit-scrollbar {
@@ -472,52 +468,41 @@
         }
 
         .chat-message {
-            margin-bottom: 12px;
-            animation: messageIn 0.2s ease;
+            margin-bottom: 8px;
+            padding: 10px 14px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            word-wrap: break-word;
         }
 
-        @keyframes messageIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .chat-message.own {
+            background: #1a3a5a;
         }
 
         .chat-message.system {
-            text-align: center;
-            color: #717171;
-            font-size: 13px;
+            background: #3a2a1a;
             font-style: italic;
         }
 
-        .chat-message.user .message-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .chat-username {
+            font-size: 13px;
+            color: #3ea6ff;
+            font-weight: 600;
             margin-bottom: 4px;
         }
 
-        .chat-message.user .message-author {
-            font-size: 13px;
-            font-weight: 600;
-            color: #3ea6ff;
-        }
-
-        .chat-message.user .message-author.admin {
+        .chat-username.admin {
             color: #ff0000;
         }
 
-        .chat-message.user .message-text {
+        .chat-username.system {
+            color: #ffa500;
+        }
+
+        .chat-text {
             font-size: 14px;
             color: #f1f1f1;
-            background: #121212;
-            padding: 8px 12px;
-            border-radius: 8px;
-            word-wrap: break-word;
+            line-height: 1.4;
         }
 
         .chat-input-area {
@@ -979,6 +964,7 @@
         let timerInterval = null;
         let playlist = [];
         let currentVideoIndex = 0;
+        let viewersData = new Map();
 
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
@@ -1002,7 +988,7 @@
             }
         }
 
-        function initPlayer(videoId = 'dQw4w9WgXcQ') {
+        function initPlayer(videoId = 'uzwgt8uGt90') {
             if (player) {
                 player.destroy();
             }
@@ -1109,7 +1095,7 @@
             socket = io(SERVER_URL);
 
             socket.on('connect', () => {
-                console.log('✅ Connected to server - Socket ID:', socket.id);
+                console.log('Connected to server');
             });
 
             socket.on('room-created', (data) => {
@@ -1128,20 +1114,10 @@
                 }
             });
 
-            socket.on('error-message', (message) => {
-                showNotification('🔒 ' + message, 'warning');
-            });
-
             socket.on('user-joined', (data) => {
-                console.log('User joined event:', data);
                 updateUserCount(data);
-                
-                // Only add to viewers list if it's not yourself
-                if (data.socketId !== socket.id) {
-                    addViewerToList(data.socketId, data.username, data.role);
-                    addChatMessage('System', `${data.username} joined as ${data.role}`, false, true);
-                    showNotification(`${data.username} joined`, 'info');
-                }
+                addViewerToList(data.socketId, data.username, data.role);
+                addChatMessage('System', `${data.username} joined as ${data.role}`, false, true);
             });
 
             socket.on('user-left', (data) => {
@@ -1155,25 +1131,11 @@
             });
 
             socket.on('viewers-list', (data) => {
-                console.log('Received viewers list:', data.viewers);
-                
-                // Clear and rebuild entire list
                 viewersData.clear();
-                
-                if (data.viewers && Array.isArray(data.viewers)) {
-                    data.viewers.forEach(viewer => {
-                        if (viewer.socketId && viewer.username) {
-                            viewersData.set(viewer.socketId, {
-                                socketId: viewer.socketId,
-                                username: viewer.username,
-                                role: viewer.role
-                            });
-                        }
-                    });
-                }
-                
+                data.viewers.forEach(viewer => {
+                    viewersData.set(viewer.socketId, viewer);
+                });
                 updateViewersList();
-                console.log('Viewers data now has:', viewersData.size, 'entries');
             });
 
             socket.on('viewers-list', (data) => {
@@ -1185,18 +1147,9 @@
             });
 
             socket.on('chat-message', (data) => {
-                console.log('Chat message received from server:', data);
-                
-                if (!data.username || !data.message) {
-                    console.error('Invalid chat message data:', data);
-                    return;
-                }
-                
                 // Check if message is from self
                 const isOwn = data.socketId === socket.id;
-                console.log('Is own message?', isOwn, 'My socket:', socket.id, 'Message socket:', data.socketId);
-                
-                addChatMessage(data.username, data.message, isOwn, false, data.role || 'user');
+                addChatMessage(data.username, data.message, isOwn, false, data.role);
             });
 
             socket.on('play', (data) => {
@@ -1227,6 +1180,7 @@
                     player.loadVideoById(data.videoId);
                     isPlaying = false;
                     updatePlayButton();
+                    addChatMessage('System', `${data.from} changed the video`, false, true);
                     setTimeout(() => { 
                         isSyncing = false;
                         updateVideoTitle();
@@ -1290,21 +1244,6 @@
                 showNotification('❌ Connection error! Make sure server is running.', 'error');
                 console.error('Connection error:', error);
             });
-
-            socket.on("chatMessage", (msg) => {
-                const chatMessages = document.getElementById("chatMessages");
-                const newMessage = document.createElement("div");
-                newMessage.classList.add("chat-message", "user");
-                newMessage.innerHTML = `
-                    <div class="message-header">
-                        <span class="message-author">${msg.user}</span>
-                    </div>
-                    <div class="message-text">${msg.text}</div>
-                `;
-                chatMessages.appendChild(newMessage);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            });
-
         }
 
         function handleRoomEntry(data) {
@@ -1362,15 +1301,21 @@
             updateTimer(data.remainingTime);
             startTimerUpdates();
 
+            // Add self to viewers list
+            viewersData.set(socket.id, { socketId: socket.id, username: username, role: userRole });
+            updateViewersList();
+
+            // Request full viewers list
+            socket.emit('request-viewers');
+
+            addChatMessage('System', `Welcome to ${data.roomName}!`, true, true);
             showNotification(`✅ Joined room as ${data.role}`, 'info');
-            console.log('Room entry complete');
         }
 
         function updateUserCount(data) {
-            const totalUsers = data.users ? data.users.length : 0;
+            const totalUsers = (data.adminCount || 0) + (data.userCount || 0);
             document.getElementById('userCount').textContent = totalUsers;
             document.getElementById('viewerCount').textContent = totalUsers;
-            console.log('User count updated:', totalUsers);
         }
 
         function enableAdminControls() {
@@ -1697,89 +1642,70 @@
             }
         }
 
-        function updateUsersList(users) {
-            const viewersList = document.getElementById('viewersList');
-            
-            if (!viewersList) {
-                console.error('Viewers list element not found!');
-                return;
-            }
-
-            viewersList.innerHTML = '';
-            
-            if (!users || users.length === 0) {
-                const emptyItem = document.createElement('div');
-                emptyItem.className = 'viewer-item';
-                emptyItem.innerHTML = '<span class="viewer-name">No viewers yet</span>';
-                viewersList.appendChild(emptyItem);
-                return;
-            }
-            
-            users.forEach(user => {
-                const userItem = document.createElement('div');
-                userItem.className = 'viewer-item';
-                
-                const userName = document.createElement('span');
-                userName.className = 'viewer-name';
-                userName.textContent = user.nickname;
-                
-                userItem.appendChild(userName);
-                
-                if (user.isAdmin) {
-                    const badge = document.createElement('span');
-                    badge.className = 'admin-badge';
-                    badge.textContent = 'ADMIN';
-                    badge.style.marginLeft = '8px';
-                    userItem.appendChild(badge);
-                } else {
-                    const badge = document.createElement('span');
-                    badge.className = 'user-badge';
-                    badge.textContent = 'VIEWER';
-                    badge.style.marginLeft = '8px';
-                    userItem.appendChild(badge);
-                }
-                
-                viewersList.appendChild(userItem);
-            });
-            
-            console.log('Updated viewers list:', users.length, 'users');
+        // Viewers List Functions
+        function addViewerToList(socketId, username, role) {
+            viewersData.set(socketId, { socketId, username, role });
+            updateViewersList();
         }
 
-        function displayChatMessage(message) {
-            const chatMessages = document.getElementById('chatMessages');
-            
-            if (!chatMessages) {
-                console.error('Chat messages element not found!');
+        function removeViewerFromList(socketId) {
+            viewersData.delete(socketId);
+            updateViewersList();
+        }
+
+        function updateViewersList() {
+            const viewersList = document.getElementById('viewersList');
+            viewersList.innerHTML = '';
+
+            if (viewersData.size === 0) {
+                viewersList.innerHTML = '<div class="viewer-item"><span class="viewer-name">No viewers yet</span></div>';
                 return;
             }
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `chat-message ${message.type}`;
-            
-            if (message.type === 'system') {
-                messageDiv.textContent = message.message;
-            } else {
-                const header = document.createElement('div');
-                header.className = 'message-header';
+
+            viewersData.forEach(viewer => {
+                const viewerItem = document.createElement('div');
+                viewerItem.className = 'viewer-item';
                 
-                const author = document.createElement('span');
-                author.className = `message-author ${message.isAdmin ? 'admin' : ''}`;
-                author.textContent = message.nickname;
+                const badge = viewer.role === 'admin' 
+                    ? '<span class="admin-badge">ADMIN</span>' 
+                    : '<span class="user-badge">VIEWER</span>';
                 
-                header.appendChild(author);
+                viewerItem.innerHTML = `
+                    <span class="viewer-name">${viewer.username}</span>
+                    ${badge}
+                `;
                 
-                const text = document.createElement('div');
-                text.className = 'message-text';
-                text.textContent = message.message;
-                
-                messageDiv.appendChild(header);
-                messageDiv.appendChild(text);
+                viewersList.appendChild(viewerItem);
+            });
+        }
+
+        // Chat Functions
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            if (socket && socket.connected) {
+                socket.emit('chat-message', { message: message });
+                input.value = '';
             }
-            
+        }
+
+        function addChatMessage(user, text, isOwn = false, isSystem = false, role = 'user') {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message' + (isOwn ? ' own' : '') + (isSystem ? ' system' : '');
+
+            const usernameClass = isSystem ? ' system' : (role === 'admin' ? ' admin' : '');
+
+            messageDiv.innerHTML = `
+                <div class="chat-username${usernameClass}">${escapeHtml(user)}</div>
+                <div class="chat-text">${escapeHtml(text)}</div>
+            `;
+
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            console.log('Chat message displayed:', message.type, message.message);
         }
 
         function escapeHtml(text) {
@@ -1814,6 +1740,7 @@
             isPlaying = false;
             userRole = 'user';
             username = '';
+            viewersData.clear();
             
             // Clear API key from session
             sessionStorage.removeItem('youtube_api_key');
@@ -1833,9 +1760,6 @@
             document.getElementById('joinJoiningId').value = '';
             document.getElementById('joinAdminPassword').value = '';
             
-            // Clear chat
-            document.getElementById('chatMessages').innerHTML = '';
-            
             showNotification('👋 Left the party', 'info');
         }
 
@@ -1854,26 +1778,6 @@
                 notification.classList.remove('show');
             }, 4000);
         }
-
-        function sendMessage() {
-            const input = document.getElementById("chatInput");
-            const message = input.value.trim();
-
-            if (message === "") return; // don’t send empty messages
-
-            // Emit to server
-            if (socket && currentRoom) {
-                 socket.emit("chatMessage", {
-                     room: currentRoom,
-                     user: username,
-                     text: message
-            });
-            }
-
-             // Clear input
-            input.value = "";
-        }
-
 
         document.addEventListener('DOMContentLoaded', () => {
             // Enter key handlers for create tab

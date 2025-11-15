@@ -186,6 +186,7 @@ io.on('connection', (socket) => {
     // Add creator as admin
     socket.join(roomId);
     socket.roomId = roomId;
+    socket.nickname = username;
     const userInfo = room.addAdmin(socket.id, username);
     socket.userRole = 'admin';
     socket.username = username;
@@ -198,6 +199,12 @@ io.on('connection', (socket) => {
       username: username,
       ...room.getState()
     });
+
+    // Send user list
+    broadcastUserList(roomId);
+
+    // Send chat history (empty for new room)
+    socket.emit('chat-history', []);
     
     console.log(`Room ${roomId} created by ${username}`);
   });
@@ -396,7 +403,48 @@ io.on('connection', (socket) => {
   });
 });
 
-// Helper function to get all viewers in a room
+// Helper function to broadcast user list to all users in room
+function broadcastUserList(roomId) {
+  const room = rooms.get(roomId);
+  if (!room) return;
+
+  const users = [];
+  
+  // Get admin socket ID (first admin)
+  const adminId = Array.from(room.admins)[0] || null;
+  
+  // Add all admins
+  room.admins.forEach(socketId => {
+    const socket = io.sockets.sockets.get(socketId);
+    if (socket) {
+      users.push({
+        id: socketId,
+        nickname: socket.username,
+        isAdmin: true
+      });
+    }
+  });
+  
+  // Add all normal users
+  room.normalUsers.forEach(socketId => {
+    const socket = io.sockets.sockets.get(socketId);
+    if (socket) {
+      users.push({
+        id: socketId,
+        nickname: socket.username,
+        isAdmin: false
+      });
+    }
+  });
+
+  // Broadcast to all users in room
+  io.to(roomId).emit('user-list-update', {
+    users: users,
+    admin: adminId
+  });
+}
+
+// Helper function to get all viewers in a room (kept for compatibility)
 function getAllViewersInRoom(room) {
   const viewers = [];
   

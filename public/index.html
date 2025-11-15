@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PANTHPARTY - Watch YouTube Together</title>
+    <title>𝐏𝐀𝐍𝐓𝐇𝐏𝐀𝐑𝐓𝐘 - 𝘞𝘢𝘵𝘤𝘩 𝘠𝘰𝘶𝘛𝘶𝘣𝘦 𝘛𝘰𝘨𝘦𝘵𝘩𝘦𝘳</title>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
         * {
@@ -388,39 +388,64 @@
             margin-top: 16px;
         }
 
-        /* Viewers List */
-        .viewers-panel {
+        /* Users Panel */
+        .users-panel {
             background: #212121;
             border-radius: 12px;
             padding: 20px;
-            height: 300px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .viewers-panel h3 {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 12px;
-            color: #f1f1f1;
-        }
-
-        .viewers-list {
-            flex: 1;
+            max-height: 300px;
             overflow-y: auto;
         }
 
-        .viewer-item {
-            padding: 8px 12px;
-            background: #2a2a2a;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .users-panel::-webkit-scrollbar {
+            width: 6px;
         }
 
-        .viewer-name {
+        .users-panel::-webkit-scrollbar-track {
+            background: #121212;
+            border-radius: 3px;
+        }
+
+        .users-panel::-webkit-scrollbar-thumb {
+            background: #3f3f3f;
+            border-radius: 3px;
+        }
+
+        .users-panel h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: #f1f1f1;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: #121212;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
             font-size: 14px;
             color: #f1f1f1;
         }
@@ -468,41 +493,52 @@
         }
 
         .chat-message {
-            margin-bottom: 8px;
-            padding: 10px 14px;
-            background: #2a2a2a;
-            border-radius: 8px;
-            word-wrap: break-word;
+            margin-bottom: 12px;
+            animation: messageIn 0.2s ease;
         }
 
-        .chat-message.own {
-            background: #1a3a5a;
+        @keyframes messageIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .chat-message.system {
-            background: #3a2a1a;
+            text-align: center;
+            color: #717171;
+            font-size: 13px;
             font-style: italic;
         }
 
-        .chat-username {
-            font-size: 13px;
-            color: #3ea6ff;
-            font-weight: 600;
+        .chat-message.user .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             margin-bottom: 4px;
         }
 
-        .chat-username.admin {
+        .chat-message.user .message-author {
+            font-size: 13px;
+            font-weight: 600;
+            color: #3ea6ff;
+        }
+
+        .chat-message.user .message-author.admin {
             color: #ff0000;
         }
 
-        .chat-username.system {
-            color: #ffa500;
-        }
-
-        .chat-text {
+        .chat-message.user .message-text {
             font-size: 14px;
             color: #f1f1f1;
-            line-height: 1.4;
+            background: #121212;
+            padding: 8px 12px;
+            border-radius: 8px;
+            word-wrap: break-word;
         }
 
         .chat-input-area {
@@ -510,15 +546,12 @@
             gap: 8px;
         }
 
-        .chat-input-area textarea {
+        .chat-input-area input {
             flex: 1;
-            min-height: 40px;
-            max-height: 100px;
-            resize: vertical;
         }
 
         .chat-input-area button {
-            align-self: flex-end;
+            padding: 12px 20px;
         }
 
         /* Search Results Panel */
@@ -747,20 +780,20 @@
         <div class="header">
             <div class="logo">
                 <div class="logo-icon">▶</div>
-                <span>PANTHPARTY</span>
+                <span>𝐏𝐀𝐍𝐓𝐇𝐏𝐀𝐑𝐓𝐘</span>
             </div>
         </div>
 
         <!-- Auth Section -->
         <div class="auth-section" id="authSection">
             <div class="tab-buttons">
-                <button class="tab-btn active" onclick="switchTab('create')">Create Room</button>
-                <button class="tab-btn" onclick="switchTab('join')">Join Room</button>
+                <button class="tab-btn active" onclick="switchTab('create')">𝐂𝐫𝐞𝐚𝐭𝐞 𝐑𝐨𝐨𝐦</button>
+                <button class="tab-btn" onclick="switchTab('join')">𝐉𝐨𝐢𝐧 𝐑𝐨𝐨𝐦</button>
             </div>
 
             <!-- Create Room Tab -->
             <div class="tab-content active" id="createTab">
-                <h2>Create a Party Room</h2>
+                <h2>𝘊𝘳𝘦𝘢𝘵𝘦 𝘢 𝘗𝘢𝘳𝘵𝘺 𝘙𝘰𝘰𝘮</h2>
                 <p>Set up a new room and become the admin</p>
                 
                 <div class="form-group">
@@ -802,7 +835,7 @@
 
             <!-- Join Room Tab -->
             <div class="tab-content" id="joinTab">
-                <h2>Join a Party Room</h2>
+                <h2>𝘑𝘰𝘪𝘯 𝘢 𝘗𝘢𝘳𝘵𝘺 𝘙𝘰𝘰𝘮</h2>
                 <p>Enter room details to join as admin or viewer</p>
                 
                 <div class="form-group">
@@ -826,7 +859,7 @@
                     <p class="helper-text">Only enter if you're an admin</p>
                 </div>
                 
-                <button class="btn-primary" onclick="joinRoom()">Join Room</button>
+                <button class="btn-primary" onclick="joinRoom()">𝐉𝐨𝐢𝐧 𝐑𝐨𝐨𝐦</button>
             </div>
         </div>
 
@@ -838,7 +871,7 @@
                     <div class="room-meta">
                         <div class="meta-item">
                             <span class="status-dot"></span>
-                            <span id="userCount">0</span> watching
+                            <span id="userCount">0</span> 𝘸𝘢𝘵𝘤𝘩𝘪𝘯𝘨
                         </div>
                         <div class="meta-item">
                             <span id="roleDisplay"></span>
@@ -847,11 +880,11 @@
                             <span class="pro-badge">PRO</span>
                         </div>
                         <div class="meta-item">
-                            ⏱️ <span class="timer-display" id="timerDisplay">00:00</span>
+                            ⏲ <span class="timer-display" id="timerDisplay">00:00</span>
                         </div>
                     </div>
                 </div>
-                <button class="btn-leave" onclick="leaveRoom()">Leave Room</button>
+                <button class="btn-leave" onclick="leaveRoom()">𝐋𝐞𝐚𝐯𝐞 𝐑𝐨𝐨𝐦</button>
             </div>
 
             <div class="main-content">
@@ -862,26 +895,26 @@
                     </div>
 
                     <div class="video-info">
-                        <h1 class="video-title" id="videoTitle">Loading video...</h1>
+                        <h1 class="video-title" id="videoTitle">𝘓𝘰𝘢𝘥𝘪𝘯𝘨 𝘷𝘪𝘥𝘦𝘰...</h1>
                     </div>
 
                     <div class="controls">
                         <div class="control-buttons">
                             <button class="control-btn play-btn" id="prevBtn" onclick="previousVideo()" disabled>
-                                <span>⏮️</span>
-                                Previous
+                                <span>⏮</span>
+                                𝐏𝐫𝐞𝐯𝐢𝐨𝐮𝐬
                             </button>
                             <button class="control-btn play-btn" id="playBtn" onclick="togglePlay()" disabled>
                                 <span id="playIcon">▶</span>
-                                <span id="playText">Play</span>
+                                <span id="playText">𝐏𝐥𝐚𝐲</span>
                             </button>
                             <button class="control-btn play-btn" id="nextBtn" onclick="nextVideo()" disabled>
-                                <span>⏭️</span>
-                                Next
+                                <span>⏭</span>
+                                𝐍𝐞𝐱𝐭
                             </button>
                             <button class="control-btn btn-icon" onclick="requestSync()">
-                                <span>🔄</span>
-                                Sync
+                                <span>꩜</span>
+                                𝐒𝐲𝐧𝐜
                             </button>
                         </div>
                         
@@ -889,11 +922,11 @@
                             <input type="text" id="videoInput" placeholder="Paste YouTube URL or Video ID or Search" />
                             <button class="btn-secondary" id="searchBtn" onclick="searchVideo()" disabled>
                                 <span>🔍</span>
-                                Search
+                                𝐒𝐞𝐚𝐫𝐜𝐡
                             </button>
                             <button class="btn-secondary" id="loadVideoBtn" onclick="changeVideo()" disabled>
                                 <span>▶️</span>
-                                Load
+                                𝐋𝐨𝐚𝐝
                             </button>
                             
                             <!-- Search Results Panel -->
@@ -903,7 +936,7 @@
                                     <button class="close-search" onclick="closeSearchResults()">×</button>
                                 </div>
                                 <div class="search-results-list" id="searchResultsList">
-                                    <div class="search-loading">Searching...</div>
+                                    <div class="search-loading">𝘚𝘦𝘢𝘳𝘤𝘩𝘪𝘯𝘨...</div>
                                 </div>
                             </div>
                         </div>
@@ -923,27 +956,18 @@
                 <div class="sidebar">
                     <!-- Chat Panel -->
                     <div class="chat-panel">
-                        <h3>💬 Chat</h3>
-                        <div class="chat-messages" id="chatMessages">
-                            <div class="chat-message">
-                                <div class="chat-username">System</div>
-                                <div class="chat-text">Welcome to PANTHPARTY! Start chatting with others.</div>
-                            </div>
-                        </div>
+                        <h3>💬 𝐂𝐡𝐚𝐭</h3>
+                        <div class="chat-messages" id="chatMessages"></div>
                         <div class="chat-input-area">
-                            <textarea id="chatInput" placeholder="Type a message..." rows="2"></textarea>
-                            <button class="btn-secondary" onclick="sendMessage()">Send</button>
+                            <input type="text" id="chatInput" placeholder="Type a message..." maxlength="200" />
+                            <button class="btn-primary" onclick="sendMessage()">𝐒𝐞𝐧𝐝</button>
                         </div>
                     </div>
 
-                    <!-- Viewers List -->
-                    <div class="viewers-panel">
-                        <h3>👥 Viewers (<span id="viewerCount">0</span>)</h3>
-                        <div class="viewers-list" id="viewersList">
-                            <div class="viewer-item">
-                                <span class="viewer-name">Loading...</span>
-                            </div>
-                        </div>
+                    <!-- Users Panel -->
+                    <div class="users-panel">
+                        <h3>👥 𝘝𝘪𝘦𝘸𝘦𝘳𝘴 (<span id="viewerCount">0</span>)</h3>
+                        <div id="usersList"></div>
                     </div>
                 </div>
             </div>
@@ -964,7 +988,6 @@
         let timerInterval = null;
         let playlist = [];
         let currentVideoIndex = 0;
-        let viewersData = new Map();
 
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
@@ -1301,21 +1324,115 @@
             updateTimer(data.remainingTime);
             startTimerUpdates();
 
-            // Add self to viewers list
-            viewersData.set(socket.id, { socketId: socket.id, username: username, role: userRole });
-            updateViewersList();
-
-            // Request full viewers list
-            socket.emit('request-viewers');
-
-            addChatMessage('System', `Welcome to ${data.roomName}!`, true, true);
             showNotification(`✅ Joined room as ${data.role}`, 'info');
         }
 
-        function updateUserCount(data) {
-            const totalUsers = (data.adminCount || 0) + (data.userCount || 0);
-            document.getElementById('userCount').textContent = totalUsers;
-            document.getElementById('viewerCount').textContent = totalUsers;
+        function updateUserCount(count) {
+            document.getElementById('userCount').textContent = count;
+            document.getElementById('viewerCount').textContent = count;
+        }
+
+        function updateControlsAccess() {
+            if (userRole === 'admin') {
+                document.getElementById('playBtn').disabled = false;
+                document.getElementById('loadVideoBtn').disabled = false;
+                document.getElementById('searchBtn').disabled = false;
+                document.getElementById('prevBtn').disabled = false;
+                document.getElementById('nextBtn').disabled = false;
+                
+                const roleDisplay = document.getElementById('roleDisplay');
+                if (roleDisplay) {
+                    roleDisplay.innerHTML = '<span class="admin-badge">ADMIN</span>';
+                }
+                document.getElementById('apiSection').style.display = 'block';
+            } else {
+                document.getElementById('playBtn').disabled = true;
+                document.getElementById('loadVideoBtn').disabled = true;
+                document.getElementById('searchBtn').disabled = true;
+                document.getElementById('prevBtn').disabled = true;
+                document.getElementById('nextBtn').disabled = true;
+                
+                const roleDisplay = document.getElementById('roleDisplay');
+                if (roleDisplay) {
+                    roleDisplay.innerHTML = '<span class="user-badge">VIEWER</span>';
+                }
+                document.getElementById('apiSection').style.display = 'none';
+            }
+        }
+
+        function updateUsersList(users) {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+            
+            users.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'user-avatar';
+                avatar.textContent = user.nickname.charAt(0).toUpperCase();
+                
+                const userInfo = document.createElement('div');
+                userInfo.className = 'user-info';
+                
+                const userName = document.createElement('div');
+                userName.className = 'user-name';
+                userName.textContent = user.nickname;
+                
+                if (user.isAdmin) {
+                    const badge = document.createElement('span');
+                    badge.className = 'admin-badge';
+                    badge.textContent = 'ADMIN';
+                    badge.style.marginLeft = '8px';
+                    userName.appendChild(badge);
+                }
+                
+                userInfo.appendChild(userName);
+                userItem.appendChild(avatar);
+                userItem.appendChild(userInfo);
+                usersList.appendChild(userItem);
+            });
+        }
+
+        function displayChatMessage(message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${message.type}`;
+            
+            if (message.type === 'system') {
+                messageDiv.textContent = message.message;
+            } else {
+                const header = document.createElement('div');
+                header.className = 'message-header';
+                
+                const author = document.createElement('span');
+                author.className = `message-author ${message.isAdmin ? 'admin' : ''}`;
+                author.textContent = message.nickname;
+                
+                header.appendChild(author);
+                
+                const text = document.createElement('div');
+                text.className = 'message-text';
+                text.textContent = message.message;
+                
+                messageDiv.appendChild(header);
+                messageDiv.appendChild(text);
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            if (socket && socket.connected) {
+                socket.emit('chat-message', { message: message });
+                input.value = '';
+            }
         }
 
         function enableAdminControls() {
@@ -1642,78 +1759,6 @@
             }
         }
 
-        // Viewers List Functions
-        function addViewerToList(socketId, username, role) {
-            viewersData.set(socketId, { socketId, username, role });
-            updateViewersList();
-        }
-
-        function removeViewerFromList(socketId) {
-            viewersData.delete(socketId);
-            updateViewersList();
-        }
-
-        function updateViewersList() {
-            const viewersList = document.getElementById('viewersList');
-            viewersList.innerHTML = '';
-
-            if (viewersData.size === 0) {
-                viewersList.innerHTML = '<div class="viewer-item"><span class="viewer-name">No viewers yet</span></div>';
-                return;
-            }
-
-            viewersData.forEach(viewer => {
-                const viewerItem = document.createElement('div');
-                viewerItem.className = 'viewer-item';
-                
-                const badge = viewer.role === 'admin' 
-                    ? '<span class="admin-badge">ADMIN</span>' 
-                    : '<span class="user-badge">VIEWER</span>';
-                
-                viewerItem.innerHTML = `
-                    <span class="viewer-name">${viewer.username}</span>
-                    ${badge}
-                `;
-                
-                viewersList.appendChild(viewerItem);
-            });
-        }
-
-        // Chat Functions
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-
-            if (!message) return;
-
-            if (socket && socket.connected) {
-                socket.emit('chat-message', { message: message });
-                input.value = '';
-            }
-        }
-
-        function addChatMessage(user, text, isOwn = false, isSystem = false, role = 'user') {
-            const chatMessages = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'chat-message' + (isOwn ? ' own' : '') + (isSystem ? ' system' : '');
-
-            const usernameClass = isSystem ? ' system' : (role === 'admin' ? ' admin' : '');
-
-            messageDiv.innerHTML = `
-                <div class="chat-username${usernameClass}">${escapeHtml(user)}</div>
-                <div class="chat-text">${escapeHtml(text)}</div>
-            `;
-
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
         function leaveRoom() {
             if (confirm('Are you sure you want to leave the room?')) {
                 forceLeaveRoom();
@@ -1740,7 +1785,6 @@
             isPlaying = false;
             userRole = 'user';
             username = '';
-            viewersData.clear();
             
             // Clear API key from session
             sessionStorage.removeItem('youtube_api_key');
@@ -1759,6 +1803,7 @@
             document.getElementById('joinUsername').value = '';
             document.getElementById('joinJoiningId').value = '';
             document.getElementById('joinAdminPassword').value = '';
+            document.getElementById('chatMessages').innerHTML = '';
             
             showNotification('👋 Left the party', 'info');
         }
@@ -1823,8 +1868,7 @@
 
             // Enter key handler for chat
             document.getElementById('chatInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
+                if (e.key === 'Enter') {
                     sendMessage();
                 }
             });

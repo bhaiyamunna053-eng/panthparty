@@ -468,10 +468,10 @@
         }
 
         .chat-message {
-            margin-bottom: 12px;
-            padding: 8px 12px;
+            margin-bottom: 8px;
+            padding: 10px 14px;
             background: #2a2a2a;
-            border-radius: 6px;
+            border-radius: 8px;
             word-wrap: break-word;
         }
 
@@ -479,10 +479,15 @@
             background: #1a3a5a;
         }
 
+        .chat-message.system {
+            background: #3a2a1a;
+            font-style: italic;
+        }
+
         .chat-username {
-            font-size: 12px;
+            font-size: 13px;
             color: #3ea6ff;
-            font-weight: 500;
+            font-weight: 600;
             margin-bottom: 4px;
         }
 
@@ -490,15 +495,14 @@
             color: #ff0000;
         }
 
+        .chat-username.system {
+            color: #ffa500;
+        }
+
         .chat-text {
             font-size: 14px;
             color: #f1f1f1;
-        }
-
-        .chat-time {
-            font-size: 11px;
-            color: #717171;
-            margin-top: 4px;
+            line-height: 1.4;
         }
 
         .chat-input-area {
@@ -515,6 +519,123 @@
 
         .chat-input-area button {
             align-self: flex-end;
+        }
+
+        /* Search Results Panel */
+        .search-results-panel {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #212121;
+            border-radius: 8px;
+            margin-top: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            border: 1px solid #303030;
+        }
+
+        .search-results-panel.active {
+            display: block;
+        }
+
+        .search-results-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #303030;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-results-header h4 {
+            font-size: 14px;
+            color: #f1f1f1;
+        }
+
+        .close-search {
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-search:hover {
+            color: #ff0000;
+        }
+
+        .search-results-list {
+            padding: 8px;
+        }
+
+        .search-result-item {
+            display: flex;
+            gap: 12px;
+            padding: 8px;
+            background: #2a2a2a;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: #3a3a3a;
+        }
+
+        .search-result-thumb {
+            width: 120px;
+            height: 68px;
+            background: #000;
+            border-radius: 4px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-result-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .search-result-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-result-title {
+            font-size: 14px;
+            color: #f1f1f1;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .search-result-channel {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .search-loading {
+            padding: 20px;
+            text-align: center;
+            color: #aaa;
+        }
+
+        .search-section {
+            position: relative;
         }
 
         .notification {
@@ -774,6 +895,17 @@
                                 <span>▶️</span>
                                 Load
                             </button>
+                            
+                            <!-- Search Results Panel -->
+                            <div class="search-results-panel" id="searchResultsPanel">
+                                <div class="search-results-header">
+                                    <h4>Search Results</h4>
+                                    <button class="close-search" onclick="closeSearchResults()">×</button>
+                                </div>
+                                <div class="search-results-list" id="searchResultsList">
+                                    <div class="search-loading">Searching...</div>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="api-section" id="apiSection" style="display: none;">
@@ -804,7 +936,7 @@
                         </div>
                     </div>
 
-                     <!-- Viewers List -->
+                    <!-- Viewers List -->
                     <div class="viewers-panel">
                         <h3>👥 Viewers (<span id="viewerCount">0</span>)</h3>
                         <div class="viewers-list" id="viewersList">
@@ -856,7 +988,7 @@
             }
         }
 
-        function initPlayer(videoId = 'dQw4w9WgXcQ') {
+        function initPlayer(videoId = 'uzwgt8uGt90') {
             if (player) {
                 player.destroy();
             }
@@ -1006,8 +1138,18 @@
                 updateViewersList();
             });
 
+            socket.on('viewers-list', (data) => {
+                viewersData.clear();
+                data.viewers.forEach(viewer => {
+                    viewersData.set(viewer.socketId, viewer);
+                });
+                updateViewersList();
+            });
+
             socket.on('chat-message', (data) => {
-                addChatMessage(data.username, data.message, false, false, data.role);
+                // Check if message is from self
+                const isOwn = data.socketId === socket.id;
+                addChatMessage(data.username, data.message, isOwn, false, data.role);
             });
 
             socket.on('play', (data) => {
@@ -1126,6 +1268,14 @@
 
             const proDisplay = document.getElementById('proModeDisplay');
             proDisplay.style.display = data.hasProMode ? 'flex' : 'none';
+
+            // If API key was provided during creation, store it for search
+            if (data.hasProMode) {
+                const createApiKey = document.getElementById('createApiKey').value.trim();
+                if (createApiKey) {
+                    sessionStorage.setItem('youtube_api_key', createApiKey);
+                }
+            }
 
             updateUserCount(data);
             initPlayer(data.videoId);
@@ -1293,10 +1443,128 @@
                 return;
             }
 
-            // Open YouTube search in new tab
-            const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-            window.open(searchUrl, '_blank');
-            showNotification('🔍 Opening YouTube search...', 'info');
+            // Check if it's a URL or video ID
+            if (query.includes('youtube.com') || query.includes('youtu.be') || query.length === 11) {
+                // It's a URL or ID, load directly
+                changeVideo();
+                return;
+            }
+
+            // Show search results panel
+            const panel = document.getElementById('searchResultsPanel');
+            const resultsList = document.getElementById('searchResultsList');
+            panel.classList.add('active');
+            resultsList.innerHTML = '<div class="search-loading">Searching YouTube...</div>';
+
+            // Perform real YouTube search
+            performYouTubeSearch(query);
+        }
+
+        async function performYouTubeSearch(query) {
+            const resultsList = document.getElementById('searchResultsList');
+            
+            // Get API key from room (PRO mode) or use default
+            const apiKey = getYouTubeAPIKey();
+            
+            if (!apiKey) {
+                resultsList.innerHTML = '<div class="search-loading">⚠️ YouTube API key required. Please update API key in PRO mode settings.</div>';
+                showNotification('⚠️ YouTube API key required for search', 'warning');
+                return;
+            }
+            
+            try {
+                // YouTube Data API v3 - Search endpoint
+                const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=10&q=${encodeURIComponent(query)}&key=${apiKey}`;
+                
+                const response = await fetch(searchUrl);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+                
+                if (!data.items || data.items.length === 0) {
+                    resultsList.innerHTML = '<div class="search-loading">No results found</div>';
+                    return;
+                }
+                
+                // Format results
+                const results = data.items.map(item => ({
+                    videoId: item.id.videoId,
+                    title: item.snippet.title,
+                    channel: item.snippet.channelTitle,
+                    thumbnail: item.snippet.thumbnails.medium.url,
+                    description: item.snippet.description
+                }));
+                
+                displaySearchResults(results);
+                
+            } catch (error) {
+                console.error('Search error:', error);
+                resultsList.innerHTML = `<div class="search-loading">❌ Search failed: ${error.message}<br><br>Please check your API key.</div>`;
+                showNotification('❌ Search failed. Check API key.', 'error');
+            }
+        }
+
+        function getYouTubeAPIKey() {
+            // Try to get API key from PRO mode settings
+            const apiKeyInput = document.getElementById('updateApiKey');
+            let apiKey = apiKeyInput ? apiKeyInput.value.trim() : '';
+            
+            // If not in input, check if stored (you can enhance this with localStorage if needed)
+            if (!apiKey) {
+                // Check if there's a stored API key in the session
+                apiKey = sessionStorage.getItem('youtube_api_key');
+            }
+            
+            return apiKey || null;
+        }
+
+        function displaySearchResults(results) {
+            const resultsList = document.getElementById('searchResultsList');
+            
+            if (results.length === 0) {
+                resultsList.innerHTML = '<div class="search-loading">No results found</div>';
+                return;
+            }
+
+            resultsList.innerHTML = '';
+            
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.onclick = () => loadSearchResult(result.videoId);
+                
+                item.innerHTML = `
+                    <div class="search-result-thumb">
+                        <img src="${result.thumbnail}" alt="${result.title}">
+                    </div>
+                    <div class="search-result-info">
+                        <div class="search-result-title">${escapeHtml(result.title)}</div>
+                        <div class="search-result-channel">${escapeHtml(result.channel)}</div>
+                    </div>
+                `;
+                
+                resultsList.appendChild(item);
+            });
+        }
+
+        function loadSearchResult(videoId) {
+            closeSearchResults();
+            
+            if (player && player.loadVideoById) {
+                player.loadVideoById(videoId);
+                socket.emit('video-change', { videoId: videoId });
+                document.getElementById('videoInput').value = '';
+                isPlaying = false;
+                updatePlayButton();
+                showNotification('📹 Loading video...', 'info');
+                setTimeout(updateVideoTitle, 1000);
+            }
+        }
+
+        function closeSearchResults() {
+            document.getElementById('searchResultsPanel').classList.remove('active');
         }
 
         function previousVideo() {
@@ -1358,8 +1626,13 @@
                 return;
             }
 
+            // Store API key in session for search functionality
+            sessionStorage.setItem('youtube_api_key', apiKey);
+
+            // Send to server for PRO mode
             socket.emit('update-api-key', { apiKey: apiKey });
-            document.getElementById('updateApiKey').value = '';
+            
+            showNotification('✅ API key updated! YouTube search now available.', 'info');
         }
 
         function requestSync() {
@@ -1415,7 +1688,6 @@
 
             if (socket && socket.connected) {
                 socket.emit('chat-message', { message: message });
-                addChatMessage(username, message, true, false, userRole);
                 input.value = '';
             }
         }
@@ -1423,19 +1695,13 @@
         function addChatMessage(user, text, isOwn = false, isSystem = false, role = 'user') {
             const chatMessages = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
-            messageDiv.className = 'chat-message' + (isOwn ? ' own' : '');
+            messageDiv.className = 'chat-message' + (isOwn ? ' own' : '') + (isSystem ? ' system' : '');
 
-            const time = new Date().toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-
-            const usernameClass = isSystem ? '' : (role === 'admin' ? ' admin' : '');
+            const usernameClass = isSystem ? ' system' : (role === 'admin' ? ' admin' : '');
 
             messageDiv.innerHTML = `
-                <div class="chat-username${usernameClass}">${user}</div>
+                <div class="chat-username${usernameClass}">${escapeHtml(user)}</div>
                 <div class="chat-text">${escapeHtml(text)}</div>
-                <div class="chat-time">${time}</div>
             `;
 
             chatMessages.appendChild(messageDiv);
@@ -1475,6 +1741,9 @@
             userRole = 'user';
             username = '';
             viewersData.clear();
+            
+            // Clear API key from session
+            sessionStorage.removeItem('youtube_api_key');
             
             document.getElementById('appSection').classList.remove('active');
             document.getElementById('authSection').style.display = 'block';
@@ -1527,7 +1796,24 @@
 
             // Enter key handler for video input
             document.getElementById('videoInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') changeVideo();
+                if (e.key === 'Enter') {
+                    const input = document.getElementById('videoInput').value.trim();
+                    // Check if it's a URL/ID or search query
+                    if (input.includes('youtube.com') || input.includes('youtu.be') || input.length === 11) {
+                        changeVideo();
+                    } else {
+                        searchVideo();
+                    }
+                }
+            });
+
+            // Close search results when clicking outside
+            document.addEventListener('click', (e) => {
+                const panel = document.getElementById('searchResultsPanel');
+                const searchSection = e.target.closest('.search-section');
+                if (!searchSection && panel.classList.contains('active')) {
+                    closeSearchResults();
+                }
             });
 
             // Enter key handler for API key update

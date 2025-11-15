@@ -446,7 +446,11 @@
             flex: 1;
             overflow-y: auto;
             margin-bottom: 12px;
-            padding-right: 8px;
+            padding: 8px;
+            min-height: 200px;
+            max-height: 400px;
+            background: #1a1a1a;
+            border-radius: 8px;
         }
 
         .chat-messages::-webkit-scrollbar {
@@ -1331,9 +1335,18 @@
             startTimerUpdates();
 
             // Don't add self to viewers list here - wait for server's viewers-list event
-            // Clear chat and add welcome message
-            document.getElementById('chatMessages').innerHTML = '';
-            addChatMessage('System', `Welcome to ${data.roomName}! You joined as ${userRole}.`, false, true);
+            // Clear existing chat messages
+            const chatContainer = document.getElementById('chatMessages');
+            if (chatContainer) {
+                chatContainer.innerHTML = '';
+                console.log('Chat container cleared');
+            }
+            
+            // Add welcome message
+            setTimeout(() => {
+                addChatMessage('System', `Welcome to ${data.roomName}! You joined as ${userRole}.`, false, true);
+                console.log('Welcome message should be visible now');
+            }, 100);
             
             showNotification(`✅ Joined room as ${data.role}`, 'info');
 
@@ -1691,12 +1704,21 @@
         function updateViewersList() {
             const viewersList = document.getElementById('viewersList');
             
-            if (!viewersList) return;
+            if (!viewersList) {
+                console.error('Viewers list element not found!');
+                return;
+            }
+
+            console.log('Updating viewers list. Current data:', Array.from(viewersData.values()));
 
             viewersList.innerHTML = '';
 
             if (viewersData.size === 0) {
-                viewersList.innerHTML = '<div class="viewer-item"><span class="viewer-name">No viewers yet</span></div>';
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'viewer-item';
+                emptyItem.innerHTML = '<span class="viewer-name">No viewers yet</span>';
+                viewersList.appendChild(emptyItem);
+                console.log('No viewers to display');
                 return;
             }
 
@@ -1708,7 +1730,9 @@
                 return a.username.localeCompare(b.username);
             });
 
-            viewersArray.forEach(viewer => {
+            console.log('Sorted viewers array:', viewersArray);
+
+            viewersArray.forEach((viewer, index) => {
                 const viewerItem = document.createElement('div');
                 viewerItem.className = 'viewer-item';
                 viewerItem.setAttribute('data-socket-id', viewer.socketId);
@@ -1717,15 +1741,20 @@
                     ? '<span class="admin-badge">ADMIN</span>' 
                     : '<span class="user-badge">VIEWER</span>';
                 
-                viewerItem.innerHTML = `
-                    <span class="viewer-name">${escapeHtml(viewer.username)}</span>
-                    ${badge}
-                `;
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'viewer-name';
+                nameSpan.textContent = viewer.username;
+                
+                viewerItem.appendChild(nameSpan);
+                viewerItem.innerHTML += ' ' + badge;
                 
                 viewersList.appendChild(viewerItem);
+                
+                console.log(`Added viewer ${index + 1}:`, viewer.username, viewer.role);
             });
 
-            console.log('Updated viewers list:', viewersData.size, 'viewers');
+            console.log('Updated viewers list:', viewersData.size, 'viewers displayed');
+            console.log('Viewers list HTML:', viewersList.innerHTML);
         }
 
         // Chat Functions
@@ -1764,17 +1793,27 @@
             if (isOwn) messageDiv.classList.add('own');
             if (isSystem) messageDiv.classList.add('system');
 
-            const usernameClass = isSystem ? 'system' : (role === 'admin' ? 'admin' : '');
+            let usernameClass = '';
+            if (isSystem) {
+                usernameClass = 'system';
+            } else if (role === 'admin') {
+                usernameClass = 'admin';
+            }
 
-            messageDiv.innerHTML = `
-                <div class="chat-username ${usernameClass}">${escapeHtml(user)}</div>
-                <div class="chat-text">${escapeHtml(text)}</div>
-            `;
+            const usernameHTML = `<div class="chat-username ${usernameClass}">${escapeHtml(user)}</div>`;
+            const textHTML = `<div class="chat-text">${escapeHtml(text)}</div>`;
+            
+            messageDiv.innerHTML = usernameHTML + textHTML;
 
             chatMessages.appendChild(messageDiv);
             
+            // Force a reflow to ensure the element is rendered
+            messageDiv.offsetHeight;
+            
             // Auto scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            setTimeout(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 50);
 
             // Limit chat messages to last 100
             while (chatMessages.children.length > 100) {
@@ -1782,6 +1821,8 @@
             }
 
             console.log('Chat message added successfully. Total messages:', chatMessages.children.length);
+            console.log('Message element:', messageDiv);
+            console.log('Chat container has', chatMessages.children.length, 'children');
         }
 
         function escapeHtml(text) {
@@ -1904,6 +1945,30 @@
                     sendMessage();
                 }
             });
+
+            // Add manual test function for debugging
+            window.testChat = function() {
+                console.log('=== MANUAL CHAT TEST ===');
+                console.log('Chat container exists?', !!document.getElementById('chatMessages'));
+                console.log('Viewers list exists?', !!document.getElementById('viewersList'));
+                console.log('Current viewers data:', Array.from(viewersData.values()));
+                console.log('Socket connected?', socket && socket.connected);
+                console.log('Current room:', currentRoom);
+                console.log('Username:', username);
+                console.log('User role:', userRole);
+                
+                // Try adding a test message
+                addChatMessage('Test User', 'This is a test message', false, false, 'user');
+                console.log('Test message added. Check chat panel.');
+                
+                // Check chat container children
+                const chatContainer = document.getElementById('chatMessages');
+                console.log('Chat container children count:', chatContainer ? chatContainer.children.length : 0);
+                
+                return 'Test complete. Check console and chat panel.';
+            };
+            
+            console.log('💡 Type window.testChat() in console to test chat manually');
         });
     </script>
 </body>

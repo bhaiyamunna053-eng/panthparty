@@ -414,6 +414,25 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Chat message event
+  socket.on("chatMessage", (data) => {
+    const room = rooms.get(socket.roomId);
+    if (room) {
+      const chatMsg = {
+        user: data.user,
+        text: data.text,
+        timestamp: new Date().toISOString()
+      };
+
+      // Save to room history
+      room.addChatMessage(chatMsg);
+
+      // Broadcast to everyone in the room
+      io.to(socket.roomId).emit("chatMessage", chatMsg);
+    }
+  });
+
+
   // Handle errors
   socket.on('error', (error) => {
     console.error('Socket error:', error);

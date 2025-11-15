@@ -27,19 +27,18 @@ class Room {
     this.joiningId = joiningId;
     this.admins = new Set();
     this.normalUsers = new Set();
-    this.users = []; // Array to store user details with nicknames
-    this.chatHistory = []; // Store chat messages
-    this.currentVideo = 'dQw4w9WgXcQ';
+    this.currentVideo = 'uzwgt8uGt90';
     this.isPlaying = false;
     this.currentTime = 0;
     this.lastUpdate = Date.now();
     this.createdAt = Date.now();
-    this.duration = duration;
+    this.duration = duration; // in minutes
     this.expiresAt = Date.now() + (duration * 60 * 1000);
     this.apiKey = apiKey;
     this.autoDestroyTimer = null;
     this.roomDestructionTimer = null;
     
+    // Set room destruction timer
     if (duration > 0) {
       this.roomDestructionTimer = setTimeout(() => {
         this.destroyRoom('duration_expired');
@@ -49,36 +48,27 @@ class Room {
 
   addAdmin(socketId, username) {
     this.admins.add(socketId);
-    // Add or update user in array
-    const existingIndex = this.users.findIndex(u => u.socketId === socketId);
-    if (existingIndex >= 0) {
-      this.users[existingIndex] = { socketId, nickname: username, isAdmin: true };
-    } else {
-      this.users.push({ socketId, nickname: username, isAdmin: true });
-    }
     this.cancelAutoDestroy();
-    return { role: 'admin', username: username };
+    return {
+      role: 'admin',
+      username: username
+    };
   }
 
   addNormalUser(socketId, username) {
     this.normalUsers.add(socketId);
-    // Add or update user in array
-    const existingIndex = this.users.findIndex(u => u.socketId === socketId);
-    if (existingIndex >= 0) {
-      this.users[existingIndex] = { socketId, nickname: username, isAdmin: false };
-    } else {
-      this.users.push({ socketId, nickname: username, isAdmin: false });
-    }
-    return { role: 'user', username: username };
+    return {
+      role: 'user',
+      username: username
+    };
   }
 
   removeUser(socketId) {
     const wasAdmin = this.admins.has(socketId);
     this.admins.delete(socketId);
     this.normalUsers.delete(socketId);
-    // Remove from users array
-    this.users = this.users.filter(u => u.socketId !== socketId);
     
+    // If last admin left, start auto-destroy timer
     if (wasAdmin && this.admins.size === 0) {
       this.startAutoDestroy();
     }
@@ -90,15 +80,8 @@ class Room {
     };
   }
 
-  addChatMessage(message) {
-    this.chatHistory.push(message);
-    // Keep only last 100 messages
-    if (this.chatHistory.length > 100) {
-      this.chatHistory.shift();
-    }
-  }
-
   startAutoDestroy() {
+    // If no admins in room, destroy after 2 minutes
     if (this.autoDestroyTimer) {
       clearTimeout(this.autoDestroyTimer);
     }
@@ -121,6 +104,7 @@ class Room {
   destroyRoom(reason) {
     console.log(`Room ${this.roomId}: Destroying room. Reason: ${reason}`);
     
+    // Clear all timers
     if (this.autoDestroyTimer) {
       clearTimeout(this.autoDestroyTimer);
     }
@@ -128,6 +112,7 @@ class Room {
       clearTimeout(this.roomDestructionTimer);
     }
     
+    // Notify all users
     const allUsers = [...this.admins, ...this.normalUsers];
     allUsers.forEach(socketId => {
       io.to(socketId).emit('room-destroyed', {
@@ -138,6 +123,7 @@ class Room {
       });
     });
     
+    // Remove from rooms map
     rooms.delete(this.roomId);
   }
 
@@ -151,7 +137,7 @@ class Room {
 
   getRemainingTime() {
     const remaining = this.expiresAt - Date.now();
-    return Math.max(0, Math.floor(remaining / 1000));
+    return Math.max(0, Math.floor(remaining / 1000)); // in seconds
   }
 
   updateState(isPlaying, currentTime) {
@@ -200,9 +186,9 @@ io.on('connection', (socket) => {
     // Add creator as admin
     socket.join(roomId);
     socket.roomId = roomId;
-    socket.username = username;
     const userInfo = room.addAdmin(socket.id, username);
     socket.userRole = 'admin';
+    socket.username = username;
     
     // Send room created confirmation
     socket.emit('room-created', {
@@ -212,16 +198,6 @@ io.on('connection', (socket) => {
       username: username,
       ...room.getState()
     });
-
-    // Send empty chat history (room just created)
-    socket.emit('chat-history', []);
-
-    // Send initial user list
-    const userListData = {
-      users: room.users,
-      admin: socket.id
-    };
-    socket.emit('user-list-update', userListData);
     
     console.log(`Room ${roomId} created by ${username}`);
   });
@@ -414,25 +390,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Chat message event
-  socket.on("chatMessage", (data) => {
-    const room = rooms.get(socket.roomId);
-    if (room) {
-      const chatMsg = {
-        user: data.user,
-        text: data.text,
-        timestamp: new Date().toISOString()
-      };
-
-      // Save to room history
-      room.addChatMessage(chatMsg);
-
-      // Broadcast to everyone in the room
-      io.to(socket.roomId).emit("chatMessage", chatMsg);
-    }
-  });
-
-
   // Handle errors
   socket.on('error', (error) => {
     console.error('Socket error:', error);
@@ -443,35 +400,30 @@ io.on('connection', (socket) => {
 function getAllViewersInRoom(room) {
   const viewers = [];
   
-  console.log(`Getting viewers for room. Admins: ${room.admins.size}, Users: ${room.normalUsers.size}`);
-  
   // Add all admins
   room.admins.forEach(socketId => {
     const adminSocket = io.sockets.sockets.get(socketId);
-    if (adminSocket && adminSocket.username) {
+    if (adminSocket) {
       viewers.push({
         socketId: socketId,
         username: adminSocket.username,
         role: 'admin'
       });
-      console.log('Added admin to viewers:', adminSocket.username);
     }
   });
   
   // Add all normal users
   room.normalUsers.forEach(socketId => {
     const userSocket = io.sockets.sockets.get(socketId);
-    if (userSocket && userSocket.username) {
+    if (userSocket) {
       viewers.push({
         socketId: socketId,
         username: userSocket.username,
         role: 'user'
       });
-      console.log('Added user to viewers:', userSocket.username);
     }
   });
   
-  console.log(`Total viewers to send: ${viewers.length}`);
   return viewers;
 }
 

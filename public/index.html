@@ -992,7 +992,7 @@
             }
         }
 
-        function initPlayer(videoId = 'uzwgt8uGt90') {
+        function initPlayer(videoId = 'dQw4w9WgXcQ') {
             if (player) {
                 player.destroy();
             }
@@ -1116,6 +1116,10 @@
                     socket.disconnect();
                     socket = null;
                 }
+            });
+
+            socket.on('error-message', (message) => {
+                showNotification('🔒 ' + message, 'warning');
             });
 
             socket.on('user-joined', (data) => {
@@ -1688,20 +1692,7 @@
             }
         }
 
-        // Viewers List Functions
-        function addViewerToList(socketId, username, role) {
-            if (!socketId || !username) return;
-            viewersData.set(socketId, { socketId, username, role });
-            updateViewersList();
-        }
-
-        function removeViewerFromList(socketId) {
-            if (!socketId) return;
-            viewersData.delete(socketId);
-            updateViewersList();
-        }
-
-        function updateViewersList() {
+        function updateUsersList(users) {
             const viewersList = document.getElementById('viewersList');
             
             if (!viewersList) {
@@ -1709,120 +1700,81 @@
                 return;
             }
 
-            console.log('Updating viewers list. Current data:', Array.from(viewersData.values()));
-
             viewersList.innerHTML = '';
-
-            if (viewersData.size === 0) {
+            
+            if (!users || users.length === 0) {
                 const emptyItem = document.createElement('div');
                 emptyItem.className = 'viewer-item';
                 emptyItem.innerHTML = '<span class="viewer-name">No viewers yet</span>';
                 viewersList.appendChild(emptyItem);
-                console.log('No viewers to display');
                 return;
             }
-
-            // Convert to array and sort (admins first)
-            const viewersArray = Array.from(viewersData.values());
-            viewersArray.sort((a, b) => {
-                if (a.role === 'admin' && b.role !== 'admin') return -1;
-                if (a.role !== 'admin' && b.role === 'admin') return 1;
-                return a.username.localeCompare(b.username);
+            
+            users.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = 'viewer-item';
+                
+                const userName = document.createElement('span');
+                userName.className = 'viewer-name';
+                userName.textContent = user.nickname;
+                
+                userItem.appendChild(userName);
+                
+                if (user.isAdmin) {
+                    const badge = document.createElement('span');
+                    badge.className = 'admin-badge';
+                    badge.textContent = 'ADMIN';
+                    badge.style.marginLeft = '8px';
+                    userItem.appendChild(badge);
+                } else {
+                    const badge = document.createElement('span');
+                    badge.className = 'user-badge';
+                    badge.textContent = 'VIEWER';
+                    badge.style.marginLeft = '8px';
+                    userItem.appendChild(badge);
+                }
+                
+                viewersList.appendChild(userItem);
             });
-
-            console.log('Sorted viewers array:', viewersArray);
-
-            viewersArray.forEach((viewer, index) => {
-                const viewerItem = document.createElement('div');
-                viewerItem.className = 'viewer-item';
-                viewerItem.setAttribute('data-socket-id', viewer.socketId);
-                
-                const badge = viewer.role === 'admin' 
-                    ? '<span class="admin-badge">ADMIN</span>' 
-                    : '<span class="user-badge">VIEWER</span>';
-                
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'viewer-name';
-                nameSpan.textContent = viewer.username;
-                
-                viewerItem.appendChild(nameSpan);
-                viewerItem.innerHTML += ' ' + badge;
-                
-                viewersList.appendChild(viewerItem);
-                
-                console.log(`Added viewer ${index + 1}:`, viewer.username, viewer.role);
-            });
-
-            console.log('Updated viewers list:', viewersData.size, 'viewers displayed');
-            console.log('Viewers list HTML:', viewersList.innerHTML);
+            
+            console.log('Updated viewers list:', users.length, 'users');
         }
 
-        // Chat Functions
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-
-            if (!message) {
-                console.log('Empty message, not sending');
-                return;
-            }
-
-            if (socket && socket.connected) {
-                console.log('Sending chat message:', message);
-                socket.emit('chat-message', { message: message });
-                input.value = '';
-            } else {
-                console.error('Socket not connected!');
-                showNotification('❌ Not connected to server', 'error');
-            }
-        }
-
-        function addChatMessage(user, text, isOwn = false, isSystem = false, role = 'user') {
+        function displayChatMessage(message) {
             const chatMessages = document.getElementById('chatMessages');
             
             if (!chatMessages) {
                 console.error('Chat messages element not found!');
                 return;
             }
-
-            console.log('Adding chat message:', { user, text, isOwn, isSystem, role });
-
+            
             const messageDiv = document.createElement('div');
-            messageDiv.className = 'chat-message';
+            messageDiv.className = `chat-message ${message.type}`;
             
-            if (isOwn) messageDiv.classList.add('own');
-            if (isSystem) messageDiv.classList.add('system');
-
-            let usernameClass = '';
-            if (isSystem) {
-                usernameClass = 'system';
-            } else if (role === 'admin') {
-                usernameClass = 'admin';
+            if (message.type === 'system') {
+                messageDiv.textContent = message.message;
+            } else {
+                const header = document.createElement('div');
+                header.className = 'message-header';
+                
+                const author = document.createElement('span');
+                author.className = `message-author ${message.isAdmin ? 'admin' : ''}`;
+                author.textContent = message.nickname;
+                
+                header.appendChild(author);
+                
+                const text = document.createElement('div');
+                text.className = 'message-text';
+                text.textContent = message.message;
+                
+                messageDiv.appendChild(header);
+                messageDiv.appendChild(text);
             }
-
-            const usernameHTML = `<div class="chat-username ${usernameClass}">${escapeHtml(user)}</div>`;
-            const textHTML = `<div class="chat-text">${escapeHtml(text)}</div>`;
             
-            messageDiv.innerHTML = usernameHTML + textHTML;
-
             chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
             
-            // Force a reflow to ensure the element is rendered
-            messageDiv.offsetHeight;
-            
-            // Auto scroll to bottom
-            setTimeout(() => {
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 50);
-
-            // Limit chat messages to last 100
-            while (chatMessages.children.length > 100) {
-                chatMessages.removeChild(chatMessages.firstChild);
-            }
-
-            console.log('Chat message added successfully. Total messages:', chatMessages.children.length);
-            console.log('Message element:', messageDiv);
-            console.log('Chat container has', chatMessages.children.length, 'children');
+            console.log('Chat message displayed:', message.type, message.message);
         }
 
         function escapeHtml(text) {

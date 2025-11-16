@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PANTHPARTY - Watch YouTube Together</title>
+    <title>𝐏𝐀𝐍𝐓𝐇𝐏𝐀𝐑𝐓𝐘 - Watch YouTube Together</title>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
         * {
@@ -256,16 +256,16 @@
         }
 
         .admin-badge {
-            background: #ff4d4d;
+            background: #ff0000;
             color: white;
-            padding: 2px 10px;
-            border-radius: 20px;
+            padding: 2px 8px;
+            border-radius: 4px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: bold;
         }
 
         .user-badge {
-            background: #3ea6ff;
+            background: #3f3f3f;
             color: #f1f1f1;
             padding: 2px 8px;
             border-radius: 4px;
@@ -323,8 +323,8 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 90%;
+            height: 90%;
         }
 
         .video-info {
@@ -411,9 +411,9 @@
         }
 
         .viewer-item {
-            padding: 10px 14px;
-            background: #252525;
-            border-radius: 8px;
+            padding: 8px 12px;
+            background: #2a2a2a;
+            border-radius: 6px;
             margin-bottom: 8px;
             display: flex;
             align-items: center;
@@ -423,18 +423,16 @@
         .viewer-name {
             font-size: 14px;
             color: #f1f1f1;
-            font-weight: 500;
         }
 
         /* Chat Section */
         .chat-panel {
-        background: #1a1a1a;
-        border-radius: 12px;
-        padding: 20px;
-        height: 500px;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            background: #212121;
+            border-radius: 12px;
+            padding: 20px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
         }
 
         .chat-panel h3 {
@@ -469,42 +467,37 @@
             background: #4f4f4f;
         }
 
-        /* User messages */
         .chat-message {
-            margin-bottom: 10px;
-            padding: 12px 16px;
-            background: #2a2a2a;
-            border-radius: 10px;
+            margin-bottom: 8px;
+            padding: 10px 14px;
+            background: #212121;
+            border-radius: 8px;
             word-wrap: break-word;
-            max-width: 80%;
         }
+
         .chat-message.own {
-            background: #1a3a5a;
-            margin-left: auto;
+            background: #212121;
         }
 
-        /* System messages: inline, subtle */
         .chat-message.system {
-            background: none;
-            padding: 4px 0;
-            text-align: center;
-            font-size: 12px;
-            color: #888;
+            background: #212121;
             font-style: italic;
-            border: none;
         }
 
-        /* Username */
         .chat-username {
             font-size: 13px;
+            color: #3ea6ff;
             font-weight: 600;
             margin-bottom: 4px;
-            color: #3ea6ff;
         }
 
         .chat-username.admin {
-            color: #ff4d4d;
-        }   
+            color: #ff0000;
+        }
+
+        .chat-username.system {
+            color: #ffa500;
+        }
 
         .chat-text {
             font-size: 14px;
@@ -754,7 +747,7 @@
         <div class="header">
             <div class="logo">
                 <div class="logo-icon">▶</div>
-                <span>PANTHPARTY</span>
+                <span>𝐏𝐀𝐍𝐓𝐇𝐏𝐀𝐑𝐓𝐘</span>
             </div>
         </div>
 

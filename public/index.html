@@ -27,13 +27,10 @@
 
         .header {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 0;
-            margin-bottom: 24px;
-            border-bottom: 1px solid #303030;
+            justify-content: center;   /* horizontally center */
+            align-items: center;       /* vertically center */
+            height: 120px;
         }
-
         .logo {
             display: flex;
             align-items: center;
@@ -43,25 +40,68 @@
             color: #f1f1f1;
         }
 
+        /* Translucent blur box */
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 30px 78.5px;
+            background: rgba(33,33,33,0.85); /* translucent dark */
+            border-radius: 16px;
+            backdrop-filter: blur(7px);        /* blur effect */
+            -webkit-backdrop-filter: blur(8px); /* Safari support */    
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        .logo-text-group {
+            display: flex;
+            flex-direction: column; /* stack text vertically */
+            align-items: flex-start;
+        }
+
         .logo-icon {
-            width: 36px;
-            height: 36px;
+            width: 69px;
+            height: 39px;
             background: #ff0000;
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 19px;
+            color: #fff;
+            font-weight: bold;
         }
+        /* Logo text */
+        .logo-text {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #f1f1f1;
+            letter-spacing: 1px;
+        }
+
+        .logo-subtext {
+            font-size: 0.9em;
+            color: #aaa; /* lighter grey */
+            margin-top: 4px;
+        }
+
 
         /* Join/Create Section */
         .auth-section {
             max-width: 550px;
             margin: 40px auto;
-            background: #212121;
+            background: rgba(20, 20, 20, 0.6);
             border-radius: 12px;
             padding: 40px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(6px);
+        }
+
+        body {
+            background: url('bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Inter', 'Roboto', sans-serif;
+            color: #f1f1f1;
         }
 
         .auth-section h2 {
@@ -747,7 +787,10 @@
         <div class="header">
             <div class="logo">
                 <div class="logo-icon">▶</div>
-                <span>𝐏𝐀𝐍𝐓𝐇𝐏𝐀𝐑𝐓𝐘</span>
+                <div class="logo-text-group">
+                    <span class="logo-text">𝐏𝐀𝐍𝐓𝐇𝐏𝐀𝐑𝐓𝐘 ☕︎</span>
+                    <span class="logo-subtext">𝘈 𝘞𝘢𝘵𝘤𝘩 𝘛𝘰𝘨𝘦𝘵𝘩𝘦𝘳 𝘈𝘱𝘱 - 𝘑𝘶𝘴𝘵 𝘍𝘰𝘳 𝘠𝘖𝘜 ;)</span>
+                </div>    
             </div>
         </div>
 

@@ -97,7 +97,7 @@
             backdrop-filter: blur(6px);
         }
 
-        body {
+        body.auth-active {
             background: url('bg.jpg') no-repeat center center fixed;
             background-size: cover;
             font-family: 'Inter', 'Roboto', sans-serif;
@@ -782,10 +782,10 @@
         }
     </style>
 </head>
-<body>
+<body class="auth-active">
     <div class="container">
         <div class="header">
-            <div class="logo">
+            <div class="logo-box">
                 <div class="logo-icon">▶</div>
                 <div class="logo-text-group">
                     <span class="logo-text">𝐏𝐀𝐍𝐓𝐇𝐏𝐀𝐑𝐓𝐘 ☕︎</span>
@@ -1297,6 +1297,7 @@
             document.getElementById('authSection').style.display = 'none';
             document.getElementById('appSection').classList.add('active');
             document.getElementById('currentRoom').textContent = data.roomName;
+            document.body.classList.remove('auth-active');
 
             const roleDisplay = document.getElementById('roleDisplay');
             if (data.role === 'admin') {
@@ -1790,6 +1791,7 @@
             
             document.getElementById('appSection').classList.remove('active');
             document.getElementById('authSection').style.display = 'block';
+            document.body.classList.add('auth-active');
             
             // Clear all input fields
             document.getElementById('createRoomName').value = '';

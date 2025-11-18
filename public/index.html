@@ -170,14 +170,6 @@
             color: #0f0f0f;
         }
 
-        /* Background image for app section */
-        body.app-active {
-            background: url('bgnew.jpg') no-repeat center center fixed;
-            background-size: cover;
-            font-family: 'Inter', 'Roboto', sans-serif;
-            color: #f1f1f1;
-        }
-
         .auth-section h2 {
             font-size: 24px;
             font-weight: 500;
@@ -448,11 +440,6 @@
         }
 
         .video-title {
-            background: rgba(0, 0, 0, 0.5);        /* semi-transparent dark background */
-            backdrop-filter: blur(10px);           /* frosted glass effect */
-            -webkit-backdrop-filter: blur(10px);   /* Safari support */
-            border-radius: 12px; 
-            padding: 16px;
             font-size: 20px;
             font-weight: 500;
             margin-bottom: 8px;
@@ -1417,7 +1404,6 @@
             document.getElementById('appSection').classList.add('active');
             document.getElementById('currentRoom').textContent = data.roomName;
             document.body.classList.remove('auth-active');
-            document.body.classList.add('app-active');
 
             const roleDisplay = document.getElementById('roleDisplay');
             if (data.role === 'admin') {
@@ -1911,7 +1897,6 @@
             
             document.getElementById('appSection').classList.remove('active');
             document.getElementById('authSection').style.display = 'block';
-            document.body.classList.remove('app-active');
             document.body.classList.add('auth-active');
             
             // Clear all input fields

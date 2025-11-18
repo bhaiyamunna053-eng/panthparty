@@ -448,6 +448,10 @@
         }
 
         .video-title {
+            background: rgba(0, 0, 0, 0.5);        /* semi-transparent dark background */
+            backdrop-filter: blur(10px);           /* frosted glass effect */
+            -webkit-backdrop-filter: blur(10px);   /* Safari support */
+            border-radius: 12px;                   /* rounded corners */
             font-size: 20px;
             font-weight: 500;
             margin-bottom: 8px;
@@ -1906,7 +1910,7 @@
             
             document.getElementById('appSection').classList.remove('active');
             document.getElementById('authSection').style.display = 'block';
-            document.body.classList.add('auth-active');
+            document.body.classList.remove('app-active');
             document.body.classList.add('auth-active');
             
             // Clear all input fields

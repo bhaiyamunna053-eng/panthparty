@@ -12,11 +12,33 @@
             box-sizing: border-box;
         }
 
+        /* Water ripple overlay */
+        .water-overlay {
+          position: fixed;
+          inset: 0;
+          pointer-events: none;   /* don’t block clicks */
+          z-index: 9999;          /* sits above everything */
+          --px: 50%;
+          --py: 50%;
+          --opacity: 0;
+          background: radial-gradient(
+            circle at var(--px) var(--py),
+          rgba(247, 239, 239, 0.415) 0%,
+          rgba(255,255,255,0.08) 20%,
+          rgba(255,255,255,0.04) 40%,
+          rgba(255,255,255,0) 70%
+          );
+          mix-blend-mode: overlay; /* blends like water shimmer */
+          opacity: var(--opacity);
+          transition: opacity 200ms ease;
+        }
+
         body {
             font-family: 'Roboto', 'Arial', sans-serif;
             background: #0f0f0f;
             color: #f1f1f1;
             min-height: 100vh;
+            transition: background 1s ease-in-out; /* smooth fade */
         }
 
         .container {
@@ -46,12 +68,52 @@
             align-items: center;
             gap: 15px;
             padding: 30px 40px;
-            background: rgba(33,33,33,0.85); /* translucent dark */
+            background: rgba(33, 33, 33, 0.632); /* translucent dark */
             border-radius: 16px;
-            backdrop-filter: blur(7px);        /* blur effect */
+            backdrop-filter: blur(3px);        /* blur effect */
             -webkit-backdrop-filter: blur(8px); /* Safari support */    
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
         }
+        /* add eight decorative pseudo-particles using before/after plus inner pseudo nodes */
+        .logo-box::before,
+        .logo-box::after,
+        .logo-box .p1,
+        .logo-box .p2,
+        .logo-box .p3,
+        .logo-box .p4,
+        .logo-box .p5,
+        .logo-box .p6 {
+          content: "";
+          position: absolute;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: radial-gradient(circle, #fff 0%, rgba(255,255,255,0.0) 70%);
+          opacity: 0;
+          transform: translateY(10px) scale(0.6);
+          pointer-events: none;
+          animation: sparkle 2.8s linear infinite;
+        }
+
+        /* initial positions and delays */
+        .logo-box::before { left: 12%; top: 14%; animation-delay: 0s; }
+        .logo-box::after  { left: 78%; top: 30%; animation-delay: 1.2s; }
+        .logo-box .p1 { left: 28%; top: 8%; animation-delay: 0.4s; }
+        .logo-box .p2 { left: 40%; top: 26%; animation-delay: 0.8s; }
+        .logo-box .p3 { left: 58%; top: 10%; animation-delay: 1.0s; }
+        .logo-box .p4 { left: 22%; top: 44%; animation-delay: 1.6s; }
+        .logo-box .p5 { left: 70%; top: 50%; animation-delay: 2.0s; }
+        .logo-box .p6 { left: 85%; top: 8%; animation-delay: 2.4s; }
+
+        @keyframes sparkle {
+          0% { opacity: 0; transform: translateY(8px) scale(0.5); }
+          8% { opacity: 1; transform: translateY(-6px) scale(1.1); }
+          40% { opacity: 0.6; transform: translateY(-12px) scale(0.9); }
+          100% { opacity: 0; transform: translateY(-20px) scale(0.6); }
+        }
+        
 
         .logo-text-group {
             display: flex;
@@ -94,7 +156,11 @@
             border-radius: 12px;
             padding: 40px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(5px);
+            background: linear-gradient(
+              rgba(255,255,255,0.08),
+              rgba(255,255,255,0.02)
+            ); 
         }
 
         body.auth-active {
@@ -102,6 +168,14 @@
             background-size: cover;
             font-family: 'Inter', 'Roboto', sans-serif;
             color: #0f0f0f;
+        }
+
+        /* Background image for app section */
+        body.app-active {
+            background: url('bg007.webp') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Inter', 'Roboto', sans-serif;
+            color: #f1f1f1;
         }
 
         .auth-section h2 {
@@ -263,7 +337,9 @@
         }
 
         .room-info {
-            background: #212121;
+            background: rgba(33, 33, 33, 0.632);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(5px);
             border-radius: 12px;
             padding: 16px 24px;
             margin-bottom: 20px;
@@ -379,7 +455,9 @@
         }
 
         .controls {
-            background: #212121;
+            background: rgba(33, 33, 33, 0.632);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(5px);
             border-radius: 12px;
             padding: 20px 24px;
             margin-bottom: 20px;
@@ -430,8 +508,11 @@
 
         /* Viewers List */
         .viewers-panel {
-            background: #212121;
+            background: rgba(33, 33, 33, 0.632);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(5px);
             border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1); 
             padding: 20px;
             height: 500px;
             display: flex;
@@ -467,8 +548,11 @@
 
         /* Chat Section */
         .chat-panel {
-            background: #212121;
+            background: rgba(33, 33, 33, 0.632);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(5px);
             border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1); 
             padding: 20px;
             height: 500px;
             display: flex;
@@ -576,6 +660,10 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             z-index: 100;
             border: 1px solid #303030;
+            background: linear-gradient(
+              rgba(255,255,255,0.08),
+              rgba(255,255,255,0.02)
+            );
         }
 
         .search-results-panel.active {
@@ -786,6 +874,8 @@
     <div class="container">
         <div class="header">
             <div class="logo-box">
+                <span class="p1"></span><span class="p2"></span><span class="p3"></span>
+                <span class="p4"></span><span class="p5"></span><span class="p6"></span>
                 <div class="logo-icon">▶</div>
                 <div class="logo-text-group">
                     <span class="logo-text">𝐏𝐀𝐍𝐓𝐇𝐏𝐀𝐑𝐓𝐘 ☕︎</span>
@@ -992,8 +1082,10 @@
             </div>
         </div>
     </div>
-
+    
+    <div class="water-overlay"></div>
     <div class="notification" id="notification"></div>
+    
 
     <script>
         const SERVER_URL = 'https://panthparty-watch.onrender.com';
@@ -1017,6 +1109,28 @@
         function onYouTubeIframeAPIReady() {
             console.log('YouTube API Ready');
         }
+
+
+        (function waterRippleEffect() {
+          const overlay = document.querySelector('.water-overlay');
+          if (!overlay) return;
+
+          function setPos(x, y) {
+            overlay.style.setProperty('--px', x + 'px');
+            overlay.style.setProperty('--py', y + 'px');
+          }
+
+          document.addEventListener('pointermove', (e) => {
+              setPos(e.clientX, e.clientY);
+              overlay.style.setProperty('--opacity', '1');
+          });
+
+          document.addEventListener('pointerleave', () => {
+              overlay.style.setProperty('--opacity', '0');
+          });
+        })();
+
+        
 
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -1298,6 +1412,7 @@
             document.getElementById('appSection').classList.add('active');
             document.getElementById('currentRoom').textContent = data.roomName;
             document.body.classList.remove('auth-active');
+            document.body.classList.add('app-active');
 
             const roleDisplay = document.getElementById('roleDisplay');
             if (data.role === 'admin') {
@@ -1791,6 +1906,7 @@
             
             document.getElementById('appSection').classList.remove('active');
             document.getElementById('authSection').style.display = 'block';
+            document.body.classList.add('auth-active');
             document.body.classList.add('auth-active');
             
             // Clear all input fields

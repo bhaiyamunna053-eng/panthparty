@@ -28,6 +28,8 @@ class Room {
     this.admins = new Set();
     this.normalUsers = new Set();
     this.currentVideo = 'uzwgt8uGt90';
+    this.videoMode = 'youtube';
+    this.videoUrl = null; 
     this.isPlaying = false;
     this.currentTime = 0;
     this.lastUpdate = Date.now();
@@ -154,6 +156,8 @@ class Room {
     }
     return {
       videoId: this.currentVideo,
+      videoUrl: this.videoUrl,
+      videoMode: this.videoMode,
       isPlaying: this.isPlaying,
       currentTime: adjustedTime,
       adminCount: this.admins.size,
@@ -313,10 +317,20 @@ io.on('connection', (socket) => {
   socket.on('video-change', (data) => {
     const room = rooms.get(socket.roomId);
     if (room && room.isAdmin(socket.id)) {
-      room.currentVideo = data.videoId;
+      room.videoMode = data.mode || 'youtube'; 
+      room.currentVideo = data.videoId || null;
+      room.videoUrl = data.videoUrl || null;
       room.updateState(false, 0);
       socket.to(socket.roomId).emit('video-change', {
-        videoId: data.videoId,
+        mode: room.videoMode, 
+        videoId: room.currentVideo,
+        videoUrl: room.videoUrl,
+        from: socket.username
+      });
+      socket.emit('video-change', {
+        mode: room.videoMode,
+        videoId: room.currentVideo,
+        videoUrl: room.videoUrl,
         from: socket.username
       });
     } else if (room && !room.isAdmin(socket.id)) {
@@ -515,4 +529,5 @@ process.on('SIGTERM', () => {
 });
 
 module.exports = { app, io };
+
 

@@ -1355,8 +1355,18 @@
                 addChatMessage(data.username, data.message, isOwn, false, data.role);
             });
 
+            // PLAY listener
             socket.on('play', (data) => {
-                if (player && player.seekTo) {
+                const directPlayer = document.getElementById('directPlayer');
+
+                if (directPlayer) {
+                    // Direct video mode
+                    directPlayer.currentTime = data.time;
+                    directPlayer.play();
+                    isPlaying = true;
+                    updatePlayButton();
+                } else if (player && player.seekTo) {
+                    // YouTube mode
                     isSyncing = true;
                     player.seekTo(data.time, true);
                     player.playVideo();
@@ -1366,8 +1376,18 @@
                 }
             });
 
+            // PAUSE listener
             socket.on('pause', (data) => {
-                if (player && player.seekTo) {
+                const directPlayer = document.getElementById('directPlayer');
+
+                if (directPlayer) {
+                    // Direct video mode
+                    directPlayer.currentTime = data.time;
+                    directPlayer.pause();
+                    isPlaying = false;
+                    updatePlayButton();
+                } else if (player && player.seekTo) {
+                    // YouTube mode
                     isSyncing = true;
                     player.seekTo(data.time, true);
                     player.pauseVideo();
@@ -1377,27 +1397,52 @@
                 }
             });
 
-            socket.on('video-change', (data) => {
-                if (player && player.loadVideoById) {
-                    isSyncing = true;
-                    player.loadVideoById(data.videoId);
-                    isPlaying = false;
-                    updatePlayButton();
-                    addChatMessage('System', `${data.from} changed the video`, false, true);
-                    setTimeout(() => { 
-                        isSyncing = false;
-                        updateVideoTitle();
-                    }, 1000);
-                }
-            });
-
+            // SEEK listener
             socket.on('seek', (data) => {
-                if (player && player.seekTo) {
+                const directPlayer = document.getElementById('directPlayer');
+
+                if (directPlayer) {
+                    // Direct video mode
+                    directPlayer.currentTime = data.time;
+                } else if (player && player.seekTo) {
+                    // YouTube mode
                     isSyncing = true;
                     player.seekTo(data.time, true);
                     setTimeout(() => { isSyncing = false; }, 500);
                 }
             });
+
+
+            socket.on('video-change', (data) => {
+                const youtubePlayer = document.getElementById('youtube-player');
+
+                if (data.mode === 'direct' && data.videoUrl) {
+                // Switch to direct video file
+                    youtubePlayer.innerHTML = `
+                        <video id="directPlayer" controls width="100%" height="100%">
+                            <source src="${data.videoUrl}" type="video/mp4">
+                        </video>`;
+
+                    isPlaying = false;
+                    updatePlayButton();
+                    addChatMessage('System', `${data.from} loaded a direct video`, false, true);
+
+                } else if (data.mode === 'youtube' && data.videoId) {
+                    // Switch to YouTube player
+                    if (player && player.loadVideoById) {
+                        isSyncing = true;
+                        player.loadVideoById(data.videoId);
+                        isPlaying = false;
+                        updatePlayButton();
+                        addChatMessage('System', `${data.from} changed the YouTube video`, false, true);
+                        setTimeout(() => { 
+                            isSyncing = false;
+                            updateVideoTitle();
+                        }, 1000);
+                    }
+                }
+            });
+
 
             socket.on('sync-state', (state) => {
                 if (player && player.seekTo) {
@@ -1595,28 +1640,66 @@
             }
 
             const input = document.getElementById('videoInput').value.trim();
+            const switchBtn = document.getElementById('videoModeSwitch');
             
             if (!input) {
                 showNotification('⚠️ Please enter a video URL or ID', 'error');
                 return;
             }
 
-            let videoId = extractVideoId(input);
+            if (switchBtn.checked) {
+                // Direct video mode
+                socket.emit('video-change', {
+                    mode: 'direct',
+                    videoUrl: input
+                });
 
-            if (player && player.loadVideoById) {
-                player.loadVideoById(videoId);
-                socket.emit('video-change', { videoId: videoId });
+                // Replace player with <video> element
+                const youtubePlayer = document.getElementById('youtube-player');
+                youtubePlayer.innerHTML = `
+                    <video id="directPlayer" controls width="100%" height="100%">
+                        <source src="${input}" type="video/mp4">
+                    </video>`;
+
                 document.getElementById('videoInput').value = '';
                 isPlaying = false;
                 updatePlayButton();
-                showNotification('📹 Loading new video...', 'info');
-                setTimeout(updateVideoTitle, 1000);
+                showNotification('📹 Loading direct video...', 'info');
+            } else {
+                // YouTube mode
+                const videoId = extractVideoId(input);
+
+                if (player && player.loadVideoById && videoId) {
+                    player.loadVideoById(videoId);
+                    socket.emit('video-change', {
+                        mode: 'youtube',
+                        videoId: videoId
+                    });
+
+                    document.getElementById('videoInput').value = '';
+                    isPlaying = false;
+                    updatePlayButton();
+                    showNotification('📹 Loading YouTube video...', 'info');
+                    setTimeout(updateVideoTitle, 1000);
+                } else {
+                    showNotification('⚠️ Invalid YouTube URL or ID', 'error');
+                }
             }
         }
 
-        function extractVideoId(input) {
+        function extractVideoIdOrUrl(input) {
+            input = input.trim();
+
+            // Check if it's a direct file URL (common video extensions)
+            const fileExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.mkv'];
+            for (const ext of fileExtensions) {
+                if (input.toLowerCase().endsWith(ext)) {
+                    return { mode: 'direct', videoUrl: input };
+                }
+            }
+
+            // Otherwise, treat as YouTube
             let videoId = input;
-            
             const patterns = [
                 /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/,
                 /youtube\.com\/embed\/([^&\s]+)/,
@@ -1631,8 +1714,9 @@
                 }
             }
 
-            return videoId;
+            return { mode: 'youtube', videoId: videoId };
         }
+
 
         function searchVideo() {
             if (userRole !== 'admin') {

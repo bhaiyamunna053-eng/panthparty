@@ -13,10 +13,16 @@ const PORT = process.env.PORT || 3001;
 
 // Store room data
 const rooms = new Map();
-
+const ytdl = require('ytdl-core');
+const cors = require('cors');
 // Middleware
 app.use(express.static('public'));
 app.use(express.json());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST"],
+  credentials: true
+}));
 
 // Room data structure with admin controls
 class Room {
@@ -507,6 +513,45 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+app.get('/api/youtube-audio/:videoId', async (req, res) => {
+  try {
+    const { videoId } = req.params;
+    
+    console.log(`🎵 Audio request for video: ${videoId}`);
+    
+    if (!videoId || videoId.length !== 11) {
+      return res.status(400).json({ error: 'Invalid video ID' });
+    }
+    
+    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    const info = await ytdl.getInfo(videoUrl);
+    const audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
+    
+    if (!audioFormats.length) {
+      return res.status(404).json({ error: 'No audio format available' });
+    }
+    
+    const format = audioFormats.reduce((best, current) => {
+      return (current.audioBitrate > best.audioBitrate) ? current : best;
+    });
+    
+    res.setHeader('Content-Type', format.mimeType || 'audio/mp4');
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    
+    ytdl(videoUrl, {
+      quality: format.itag,
+      filter: 'audioonly'
+    }).pipe(res);
+    
+  } catch (error) {
+    console.error('❌ Audio stream error:', error);
+    res.status(500).json({ error: 'Failed to fetch audio stream' });
+  }
+});
+
+console.log('🎵 YouTube audio proxy ready');
+
 // Start server
 http.listen(PORT, () => {
   console.log(`🎉 PANTHPARTY Server running on port ${PORT}`);
@@ -529,5 +574,6 @@ process.on('SIGTERM', () => {
 });
 
 module.exports = { app, io };
+
 
 

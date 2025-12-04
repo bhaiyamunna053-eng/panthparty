@@ -698,10 +698,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             z-index: 100;
             border: 1px solid #303030;
-            background: linear-gradient(
-              rgba(255,255,255,0.08),
-              rgba(255,255,255,0.02)
-            );
         }
 
         .search-results-panel.active {
@@ -1029,7 +1025,9 @@
                 <!-- Video Section -->
                 <div class="video-section">
                     <div class="video-container">
-                        <div id="youtube-player"></div>
+                        <div id="youtube-player" style="width:100%; height:400px; background:#000; display:flex; align-items:center; justify-content:center;">
+                            <p style="color:#fff;">No video loaded yet</p>
+                        </div>
                     </div>
 
                     <div class="video-info">
@@ -1414,12 +1412,22 @@
 
 
             socket.on('video-change', (data) => {
-                const youtubePlayer = document.getElementById('youtube-player');
+                const container = document.getElementById('youtube-player'); // make sure this exists in HTML
+
+                if (!container) {
+                    console.error("Player container not found!");
+                    return;
+                }
 
                 if (data.mode === 'direct' && data.videoUrl) {
-                // Switch to direct video file
-                    youtubePlayer.innerHTML = `
-                        <video id="directPlayer" controls width="100%" height="100%">
+                    // Clear any existing YouTube player
+                    if (player && player.destroy) {
+                        player.destroy();
+                    }
+
+                    // Inject direct video
+                    container.innerHTML = `
+                        <video id="directPlayer" controls autoplay width="100%" height="100%">
                             <source src="${data.videoUrl}" type="video/mp4">
                         </video>`;
 
@@ -1428,20 +1436,27 @@
                     addChatMessage('System', `${data.from} loaded a direct video`, false, true);
 
                 } else if (data.mode === 'youtube' && data.videoId) {
-                    // Switch to YouTube player
-                    if (player && player.loadVideoById) {
-                        isSyncing = true;
-                        player.loadVideoById(data.videoId);
-                        isPlaying = false;
-                        updatePlayButton();
-                        addChatMessage('System', `${data.from} changed the YouTube video`, false, true);
-                        setTimeout(() => { 
-                            isSyncing = false;
-                            updateVideoTitle();
-                        }, 1000);
-                    }
+                    // Inject YouTube iframe
+                    container.innerHTML = `
+                        <iframe id="ytIframe" width="100%" height="100%"
+                            src="https://www.youtube.com/embed/${data.videoId}?enablejsapi=1"
+                            frameborder="0" allowfullscreen>
+                        </iframe>`;
+
+                    // Reinitialize YouTube API player
+                    player = new YT.Player('ytIframe', {
+                        events: {
+                            'onReady': () => {
+                                isPlaying = false;
+                                updatePlayButton();
+                                addChatMessage('System', `${data.from} changed the YouTube video`, false, true);
+                                setTimeout(updateVideoTitle, 1000);
+                            }
+                        }
+                    });
                 }
             });
+
 
 
             socket.on('sync-state', (state) => {

@@ -1024,6 +1024,28 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="background-audio-section" style="padding-top: 16px; border-top: 1px solid #303030; margin-top: 16px;">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 12px 16px; background: #212121; border-radius: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <span style="font-size: 24px;">🎵</span>
+                                        <div>
+                                            <div style="font-size: 14px; font-weight: 500; color: #f1f1f1;">Background Audio</div>
+                                            <div style="font-size: 12px; color: #aaa; margin-top: 2px;">Continue playing when screen is locked</div>
+                                        </div>
+                                    </div>
+                                    <input type="checkbox" id="backgroundAudioToggle" 
+                                       onchange="toggleBackgroundAudio(this.checked)" 
+                                       checked
+                                       style="width: 24px; height: 24px; cursor: pointer;">
+                                </label>
+                            </div>
+    
+                            <div id="backgroundAudioStatus" style="display: none; margin-top: 12px; padding: 12px; background: #1a1a1a; border-radius: 8px; font-size: 13px; border-left: 4px solid #00ff00;">
+                                <span id="backgroundAudioStatusText"></span>
+                            </div>
+                        </div>
                         
                         <div class="api-section" id="apiSection" style="display: none;">
                             <div class="form-group">
@@ -1084,6 +1106,9 @@
         let playlist = [];
         let currentVideoIndex = 0;
         let viewersData = new Map();
+        let backgroundAudioEnabled = false;
+        let backgroundAudioElement = null;
+        let isBackgroundMode = false;
 
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
@@ -1972,6 +1997,159 @@
                 }
             });
         });
+
+        function initBackgroundAudio() {
+            console.log('🎵 Initializing background audio...');
+            
+            backgroundAudioElement = document.createElement('audio');
+            backgroundAudioElement.style.display = 'none';
+            backgroundAudioElement.crossOrigin = 'anonymous';
+            document.body.appendChild(backgroundAudioElement);
+    
+            setupMediaSession();
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+            console.log('✅ Background audio ready');
+            }
+
+        function handleVisibilityChange() {
+            if (!backgroundAudioEnabled) return;
+
+            if (document.hidden) {
+                console.log('📱 Screen locked - audio mode');
+                switchToAudioMode();
+                updateBackgroundStatus('🎧 Audio-only mode (screen locked)', '#ffa500');
+            } else {
+                console.log('📱 Screen unlocked - video mode');
+                switchToVideoMode();
+                updateBackgroundStatus('📺 Video mode active', '#00ff00');
+                setTimeout(() => {
+                    document.getElementById('backgroundAudioStatus').style.display = 'none';
+                }, 2000);
+            }
+        }
+
+        function switchToAudioMode() {
+            if (!player || isBackgroundMode) return;
+            
+            try {
+                const currentTime = player.getCurrentTime();
+                const videoData = player.getVideoData();
+                const videoId = videoData.video_id;
+        
+                const audioUrl = `${SERVER_URL}/api/youtube-audio/${videoId}`;
+                
+                backgroundAudioElement.src = audioUrl;
+                backgroundAudioElement.currentTime = currentTime;
+        
+                if (isPlaying) {
+                    backgroundAudioElement.play()
+                        .then(() => {
+                            console.log('✅ Audio playing');
+                            isBackgroundMode = true;
+                            updateMediaSession(videoData.title, videoData.author);
+                        })
+                        .catch(err => console.error('❌ Audio failed:', err));
+                }
+            } catch (error) {
+                console.error('❌ Switch error:', error);
+            }
+        }
+
+        function switchToVideoMode() {
+            if (!isBackgroundMode) return;
+    
+            try {
+                if (backgroundAudioElement && !backgroundAudioElement.paused) {
+                    const currentTime = backgroundAudioElement.currentTime;
+                    backgroundAudioElement.pause();
+                    backgroundAudioElement.src = '';
+
+                    if (player && player.seekTo) {
+                        player.seekTo(currentTime, true);
+                    }
+                }
+                isBackgroundMode = false;
+            } catch (error) {
+                console.error('❌ Switch back error:', error);
+            }
+        }
+
+        function setupMediaSession() {
+            if (!('mediaSession' in navigator)) {
+                console.warn('⚠️ Media Session not supported');
+                return;
+            }
+            
+            navigator.mediaSession.setActionHandler('play', () => {
+                if (backgroundAudioElement && isBackgroundMode) {
+                    backgroundAudioElement.play();
+                } else if (player) {
+                    togglePlay();
+                }
+            });
+    
+            navigator.mediaSession.setActionHandler('pause', () => {
+                if (backgroundAudioElement && isBackgroundMode) {
+                    backgroundAudioElement.pause();
+                } else if (player) {
+                    togglePlay();
+                }
+            });
+        }
+
+        function updateMediaSession(title, artist) {
+            if (!('mediaSession' in navigator)) return;
+
+            try {
+                const videoData = player ? player.getVideoData() : {};
+                const thumbnail = `https://i.ytimg.com/vi/${videoData.video_id}/maxresdefault.jpg`;
+        
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: title || 'PANTHPARTY',
+                    artist: artist || 'Unknown',
+                    album: currentRoom || 'Watch Party',
+                    artwork: [
+                        { src: thumbnail, sizes: '512x512', type: 'image/jpeg' }
+                    ]
+                });
+            } catch (error) {
+                console.error('❌ Media Session error:', error);
+            }
+        }
+
+        function toggleBackgroundAudio(enable) {
+            backgroundAudioEnabled = enable;
+
+            if (enable) {
+                console.log('✅ Background audio enabled');
+                updateBackgroundStatus('🎵 Background audio enabled! Music continues when screen locks.', '#00ff00');
+                showNotification('🎵 Background audio enabled!', 'info');
+            } else {
+                console.log('❌ Background audio disabled');
+                updateBackgroundStatus('Background audio disabled', '#717171');
+                if (backgroundAudioElement) {
+                    backgroundAudioElement.pause();
+                    backgroundAudioElement.src = '';
+                }
+                isBackgroundMode = false;
+                setTimeout(() => {
+                    document.getElementById('backgroundAudioStatus').style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function updateBackgroundStatus(message, color) {
+            const statusDiv = document.getElementById('backgroundAudioStatus');
+            const statusText = document.getElementById('backgroundAudioStatusText');
+    
+            if (statusDiv && statusText) {
+                statusDiv.style.display = 'block';
+                statusDiv.style.borderLeft = `4px solid ${color}`;
+                statusText.textContent = message;
+            }
+        }
+        
     </script>
 </body>
 </html>
